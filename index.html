@@ -464,6 +464,12 @@
 
 </section>
 
+<!-- hidden form — CORS 우회 제출용 -->
+<iframe name="gasFrame" style="display:none"></iframe>
+<form id="gasForm" method="POST" target="gasFrame" style="display:none">
+  <input type="hidden" name="payload" id="gasPayload">
+</form>
+
 <footer>© 2025 대학생활 멘토 연결 프로젝트</footer>
 
 <script>
@@ -773,25 +779,14 @@
       name, univ, contact,
     };
 
-    try {
-      if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
-        console.log('제출 데이터 (개발 모드):', payload);
-        await new Promise(r => setTimeout(r, 800));
-      } else {
-        await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify(payload),
-        });
-      }
-      nextStep(6);
-    } catch (err) {
-      console.error(err);
-      btn.disabled = false;
-      btn.textContent = '✨ 멘토 연결 신청하기';
-      alert('제출 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.');
-    }
+    // hidden form 방식으로 제출 (CORS 완전 우회)
+    const form = document.getElementById('gasForm');
+    form.action = APPS_SCRIPT_URL;
+    document.getElementById('gasPayload').value = JSON.stringify(payload);
+    form.submit();
+
+    // 폼 제출은 백그라운드(iframe)로 처리되므로 1.5초 후 성공 화면으로 이동
+    setTimeout(() => nextStep(6), 1500);
   }
 </script>
 </body>
