@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>대학 1학년 맞춤 가이드 | 좋은 멘토, 좋은 친구</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --accent: #f59e0b;
+      --bg: #0f0f1a;
+      --card: #1a1a2e;
+      --card2: #16213e;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --border: #2d2d4e;
+      --success: #10b981;
+    }
+
+    body {
+      font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+      background: radial-gradient(ellipse at 50% 0%, #3730a3 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 80%, #7c3aed22 0%, transparent 50%),
+                  var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, #ffffff08 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 6vw, 56px);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: clamp(15px, 2vw, 18px);
+      max-width: 520px;
+      margin-bottom: 48px;
+    }
+
+    .scroll-hint {
+      animation: bounce 2s infinite;
+      font-size: 24px;
+      margin-top: 8px;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
+
+    /* ── FORM SECTION ── */
+    .section {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+
+    .step {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    .step.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .step h2 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .step .sub {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    /* ── OPTION GRID ── */
+    .option-grid {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .option-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .option-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+    .option-btn {
+      background: var(--card);
+      border: 2px solid var(--border);
+      color: var(--text);
+      padding: 16px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .option-btn:hover {
+      border-color: var(--primary);
+      background: #1e1e3a;
+    }
+
+    .option-btn.selected {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, #312e81, #1e1b4b);
+      color: #a5b4fc;
+    }
+
+    .option-btn .emoji { font-size: 22px; display: block; margin-bottom: 6px; }
+    .option-btn .desc { font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 4px; }
+
+    /* ── INPUT ── */
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .input-group input {
+      width: 100%;
+      background: var(--card);
+      border: 2px solid var(--border);
+      color: var(--text);
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+      border-color: var(--primary);
+    }
+
+    .input-group input::placeholder { color: #4a4a6a; }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── RESULT ── */
+    .result-card {
+      background: linear-gradient(135deg, var(--card2), var(--card));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, #6366f120 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .result-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .mbti-tag {
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      color: white;
+      font-size: 18px;
+      font-weight: 800;
+      padding: 6px 16px;
+      border-radius: 8px;
+    }
+
+    .blood-tag {
+      background: #7f1d1d;
+      color: #fca5a5;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+    }
+
+    .result-card h3 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .guide-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .guide-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 15px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .guide-list li .icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .mentor-card {
+      background: linear-gradient(135deg, #1a2744, #1e1a3a);
+      border: 1px solid #3730a3;
+      border-radius: 20px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .mentor-card h3 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .mentor-card p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── PROGRESS ── */
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--border);
+      border-radius: 100px;
+      margin-bottom: 48px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #8b5cf6);
+      border-radius: 100px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── SUCCESS ── */
+    .success-screen {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .success-icon {
+      font-size: 64px;
+      margin-bottom: 24px;
+      display: block;
+    }
+
+    .success-screen h2 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .success-screen p {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 32px 20px;
+      color: #3a3a5c;
+      font-size: 13px;
+    }
+
+    @media (max-width: 480px) {
+      .option-grid.cols-4 { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <span class="badge">🎓 대학 1학년 한정</span>
+  <h1>나에게 맞는<br /><span class="highlight">대학생활 가이드</span>를<br />무료로 받으세요</h1>
+  <p>MBTI와 혈액형을 입력하면<br />당신의 성향에 딱 맞는 대학 생활 꿀팁을 알려드려요.</p>
+  <div class="scroll-hint">↓</div>
+</section>
+
+<!-- ── FORM ── -->
+<section class="section">
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 25%"></div>
+  </div>
+
+  <!-- STEP 1: MBTI -->
+  <div class="step active" id="step1">
+    <p class="step-label">Step 1 / 4</p>
+    <h2>당신의 MBTI는?</h2>
+    <p class="sub">가장 최근에 나온 결과를 선택해 주세요</p>
+
+    <div class="option-grid cols-2">
+      <button class="option-btn" onclick="select('mbti','INTJ')"><span class="emoji">🎯</span>INTJ<span class="desc">전략가</span></button>
+      <button class="option-btn" onclick="select('mbti','INTP')"><span class="emoji">🔭</span>INTP<span class="desc">논리술사</span></button>
+      <button class="option-btn" onclick="select('mbti','ENTJ')"><span class="emoji">👑</span>ENTJ<span class="desc">통솔자</span></button>
+      <button class="option-btn" onclick="select('mbti','ENTP')"><span class="emoji">💡</span>ENTP<span class="desc">변론가</span></button>
+      <button class="option-btn" onclick="select('mbti','INFJ')"><span class="emoji">🌙</span>INFJ<span class="desc">옹호자</span></button>
+      <button class="option-btn" onclick="select('mbti','INFP')"><span class="emoji">🌿</span>INFP<span class="desc">중재자</span></button>
+      <button class="option-btn" onclick="select('mbti','ENFJ')"><span class="emoji">🌟</span>ENFJ<span class="desc">선도자</span></button>
+      <button class="option-btn" onclick="select('mbti','ENFP')"><span class="emoji">🎨</span>ENFP<span class="desc">활동가</span></button>
+      <button class="option-btn" onclick="select('mbti','ISTJ')"><span class="emoji">📋</span>ISTJ<span class="desc">현실주의자</span></button>
+      <button class="option-btn" onclick="select('mbti','ISFJ')"><span class="emoji">🛡️</span>ISFJ<span class="desc">수호자</span></button>
+      <button class="option-btn" onclick="select('mbti','ESTJ')"><span class="emoji">⚙️</span>ESTJ<span class="desc">경영자</span></button>
+      <button class="option-btn" onclick="select('mbti','ESFJ')"><span class="emoji">🤝</span>ESFJ<span class="desc">집정관</span></button>
+      <button class="option-btn" onclick="select('mbti','ISTP')"><span class="emoji">🔧</span>ISTP<span class="desc">장인</span></button>
+      <button class="option-btn" onclick="select('mbti','ISFP')"><span class="emoji">🎭</span>ISFP<span class="desc">모험가</span></button>
+      <button class="option-btn" onclick="select('mbti','ESTP')"><span class="emoji">⚡</span>ESTP<span class="desc">기업가</span></button>
+      <button class="option-btn" onclick="select('mbti','ESFP')"><span class="emoji">🎉</span>ESFP<span class="desc">연예인</span></button>
+    </div>
+
+    <button class="btn-primary" id="next1" onclick="nextStep(2)" disabled>다음 →</button>
+  </div>
+
+  <!-- STEP 2: 혈액형 -->
+  <div class="step" id="step2">
+    <p class="step-label">Step 2 / 4</p>
+    <h2>혈액형은?</h2>
+    <p class="sub">재미로 보는 성향 분석에 활용해요</p>
+
+    <div class="option-grid cols-4">
+      <button class="option-btn" onclick="select('blood','A')"><span class="emoji">🔴</span>A형</button>
+      <button class="option-btn" onclick="select('blood','B')"><span class="emoji">🟠</span>B형</button>
+      <button class="option-btn" onclick="select('blood','O')"><span class="emoji">🟡</span>O형</button>
+      <button class="option-btn" onclick="select('blood','AB')"><span class="emoji">🟣</span>AB형</button>
+    </div>
+
+    <button class="btn-primary" id="next2" onclick="nextStep(3)" disabled>다음 →</button>
+  </div>
+
+  <!-- STEP 3: 결과 + 연락처 -->
+  <div class="step" id="step3">
+    <p class="step-label">Step 3 / 4</p>
+    <h2>맞춤 가이드 결과</h2>
+    <p class="sub" id="result-subtitle"></p>
+
+    <div class="result-card" id="resultCard">
+      <div class="result-badge">
+        <span class="mbti-tag" id="mbtiTag"></span>
+        <span class="blood-tag" id="bloodTag"></span>
+      </div>
+      <h3 id="resultTitle"></h3>
+      <ul class="guide-list" id="guideList"></ul>
+    </div>
+
+    <div class="mentor-card">
+      <h3>🌱 좋은 멘토, 좋은 친구가 필요해요</h3>
+      <p>인생에서 가장 중요한 건 <strong style="color:#a5b4fc">누구를 만나느냐</strong>입니다.<br />
+      대학 생활을 함께 설계해 줄 멘토와 동료들을 연결해 드릴게요.</p>
+    </div>
+
+    <button class="btn-primary" onclick="nextStep(4)">연락처 남기고 연결받기 →</button>
+  </div>
+
+  <!-- STEP 4: 연락처 수집 -->
+  <div class="step" id="step4">
+    <p class="step-label">Step 4 / 4</p>
+    <h2>연락처를 남겨주세요</h2>
+    <p class="sub">소중한 정보는 멘토 매칭 외에 절대 사용하지 않아요</p>
+
+    <div class="input-group">
+      <label>이름</label>
+      <input type="text" id="inputName" placeholder="홍길동" />
+    </div>
+    <div class="input-group">
+      <label>대학교</label>
+      <input type="text" id="inputUniv" placeholder="예: 연세대학교, 부산대학교" />
+    </div>
+    <div class="input-group">
+      <label>전화번호 또는 카카오톡 ID</label>
+      <input type="text" id="inputContact" placeholder="010-0000-0000 또는 카카오톡 ID" />
+    </div>
+
+    <button class="btn-primary" id="submitBtn" onclick="submitForm()">✨ 멘토 연결 신청하기</button>
+    <p style="text-align:center; color: #3a3a5c; font-size:13px; margin-top:12px;">수집된 정보는 멘토 매칭 목적으로만 사용됩니다</p>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="step" id="stepSuccess">
+    <div class="success-screen">
+      <span class="success-icon">🎉</span>
+      <h2>신청 완료!</h2>
+      <p>곧 연락드릴게요.<br /><br />
+      좋은 멘토, 좋은 친구들과 함께<br />최고의 대학 생활을 만들어 보세요 💪</p>
+    </div>
+  </div>
+
+</section>
+
+<footer>© 2025 대학생활 멘토 연결 프로젝트</footer>
+
+<script>
+  // ──────────────────────────────────────────────
+  //  Google Apps Script 웹훅 URL — 배포 후 교체
+  // ──────────────────────────────────────────────
+  const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+
+  // ──────────────────────────────────────────────
+  //  MBTI × 혈액형 가이드 데이터
+  // ──────────────────────────────────────────────
+  const guides = {
+    // NT 계열
+    INTJ: {
+      title: '전략적 독립형 — 목표 설정이 생명',
+      tips: [
+        { icon: '📌', text: '1학년 때 커리큘럼 전체를 미리 파악하고 4년 로드맵을 짜세요. 즉흥적으로 움직이면 나중에 후회해요.' },
+        { icon: '🔬', text: '관심 분야의 교수님 연구실을 2학기부터 두드리세요. 조기 진입이 INTJ의 가장 큰 무기입니다.' },
+        { icon: '🤝', text: '혼자 잘하는 건 강점이지만 팀 프로젝트에서 소통 연습을 의식적으로 하지 않으면 나중에 걸림돌이 돼요.' },
+      ]
+    },
+    INTP: {
+      title: '탐구형 — 지식이 곧 자산',
+      tips: [
+        { icon: '📚', text: '전공 외 타과 수업을 최소 1개씩 들으세요. INTP는 연결 고리에서 창의성이 나와요.' },
+        { icon: '⏰', text: '마감 관리가 최대 약점입니다. 캘린더 앱과 친해지는 게 1학년의 핵심 과제예요.' },
+        { icon: '💬', text: '발표 수업을 의도적으로 선택해 보세요. 논리는 완벽한데 전달이 약하면 아무도 몰라줘요.' },
+      ]
+    },
+    ENTJ: {
+      title: '리더십형 — 무대를 만들어라',
+      tips: [
+        { icon: '🏆', text: '학생회, 동아리 임원을 1학년부터 노리세요. ENTJ는 구조를 만드는 환경에서 폭발적으로 성장해요.' },
+        { icon: '🌐', text: '네트워킹 행사, 대외활동 공모전에 적극 참여하세요. 인맥은 1학년 때 가장 넓게 형성돼요.' },
+        { icon: '💡', text: '팀원을 너무 몰아붙이지 않게 주의하세요. 리더십과 독재는 한 끗 차이예요.' },
+      ]
+    },
+    ENTP: {
+      title: '아이디어형 — 연결이 곧 기회',
+      tips: [
+        { icon: '🚀', text: '창업 동아리, 해커톤, 아이디어 경진대회를 적극 공략하세요. ENTP의 아이디어 체력은 거기서 빛나요.' },
+        { icon: '📐', text: '아이디어는 많은데 마무리가 약합니다. 작은 것 하나를 끝까지 완성시키는 연습이 필요해요.' },
+        { icon: '🗣️', text: '토론 동아리 추천. 논증 능력이 이미 있지만 체계를 갖추면 설득력이 배가돼요.' },
+      ]
+    },
+    INFJ: {
+      title: '통찰형 — 깊이가 강점',
+      tips: [
+        { icon: '🌱', text: '1학년은 자신이 진짜 원하는 게 뭔지 탐색하는 시간으로 쓰세요. 사회 기대에 끌려가지 마세요.' },
+        { icon: '✍️', text: '글쓰기나 콘텐츠 제작 동아리를 추천해요. INFJ의 통찰력은 텍스트로 표현될 때 가장 빛납니다.' },
+        { icon: '⚖️', text: '다른 사람 상담을 너무 많이 해주다 번아웃 오기 쉬워요. 에너지 관리를 의식적으로 해야 해요.' },
+      ]
+    },
+    INFP: {
+      title: '이상주의형 — 가치를 찾아라',
+      tips: [
+        { icon: '🎯', text: '전공이 나와 안 맞는다고 느껴도 1학년엔 판단을 유보하세요. 적응에 시간이 더 걸리는 편이에요.' },
+        { icon: '🎭', text: '예술, 문학, 사회적 가치를 다루는 동아리에서 에너지를 충전하세요.' },
+        { icon: '📅', text: '마감 앞에 몰리는 패턴이 있다면 역산 일정 관리법을 배워두는 게 좋아요.' },
+      ]
+    },
+    ENFJ: {
+      title: '성장 촉진형 — 사람이 에너지',
+      tips: [
+        { icon: '🌟', text: '멘토링 프로그램, 봉사 동아리 리더 역할이 ENFJ와 딱 맞아요. 에너지를 좋은 데 쓰세요.' },
+        { icon: '🧘', text: '다른 사람을 너무 챙기다 자기 자신을 놓치기 쉬워요. 먼저 내 목표와 성적을 챙겨요.' },
+        { icon: '🤝', text: '교수님과의 관계 형성이 뛰어납니다. 오피스 아워를 적극 활용하면 기회가 달라져요.' },
+      ]
+    },
+    ENFP: {
+      title: '열정폭발형 — 경험이 스펙',
+      tips: [
+        { icon: '🎪', text: '동아리는 하나만 하지 말고 여러 개 기웃거려 보세요. ENFP는 다양한 자극에서 아이디어가 나와요.' },
+        { icon: '📓', text: '열정이 넘치는 만큼 금방 지치기도 해요. 처음에 너무 무리하게 시작하면 2학기에 번아웃 옵니다.' },
+        { icon: '🔗', text: '사람을 많이 사귀는 강점을 살려 선배 네트워크를 빠르게 만들면 취업·인턴 정보가 남들보다 먼저 들어요.' },
+      ]
+    },
+    // SJ 계열
+    ISTJ: {
+      title: '신뢰형 — 루틴이 무기',
+      tips: [
+        { icon: '📋', text: '강의계획서를 학기 시작 전에 다 읽어두세요. ISTJ는 미리 알고 있을 때 최고의 성과를 내요.' },
+        { icon: '🗂️', text: '필기 노트 정리 습관은 절대 포기하지 마세요. 시험 전에 빛을 발합니다.' },
+        { icon: '🌈', text: '새로운 사람 만나는 게 부담스럽더라도 MT, OT 같은 공식 행사는 꼭 참석하세요. 첫 연결이 중요해요.' },
+      ]
+    },
+    ISFJ: {
+      title: '헌신형 — 성실함이 자산',
+      tips: [
+        { icon: '👥', text: '팀플에서 항상 더 많이 하는 역할이 되기 쉬워요. 자신의 기여를 확실히 표현하는 연습이 필요해요.' },
+        { icon: '📖', text: '복수전공이나 부전공을 일찍 알아보세요. 선택지를 넓혀두면 ISFJ의 꼼꼼함이 배가돼요.' },
+        { icon: '💪', text: '"No"라고 말하는 연습을 1학년 때부터 해야 해요. 부탁을 다 들어주다 학점이 흔들려요.' },
+      ]
+    },
+    ESTJ: {
+      title: '실행형 — 체계가 성과',
+      tips: [
+        { icon: '🏗️', text: '스터디 그룹을 직접 만들어서 운영해 보세요. ESTJ는 구조를 짜는 역할에서 진가를 발휘해요.' },
+        { icon: '📊', text: '학점 관리 스프레드시트를 직접 만들어 관리하면 성취감과 결과 모두 잡을 수 있어요.' },
+        { icon: '🌿', text: '내 기준이 뚜렷한 만큼 다른 방식을 인정하는 유연성도 연습하세요. 팀플에서 협력이 달라져요.' },
+      ]
+    },
+    ESFJ: {
+      title: '화합형 — 관계가 동력',
+      tips: [
+        { icon: '🎊', text: '동기들과의 유대감이 강점이에요. 과 행사 기획, 학생회 활동에서 자연스럽게 빛납니다.' },
+        { icon: '📌', text: '다른 사람 눈치를 너무 보다 전공 선택, 동아리 선택을 후회하는 경우가 생겨요. 내 기준을 명확히 해요.' },
+        { icon: '🏅', text: '팀플 에이스이지만 발표에서 자신의 기여를 명확히 어필하는 습관을 들여야 학점이 달라져요.' },
+      ]
+    },
+    // SP 계열
+    ISTP: {
+      title: '문제해결형 — 실전이 배움터',
+      tips: [
+        { icon: '🔩', text: '실습, 실험, 현장 위주의 수업을 최대한 많이 신청하세요. 이론보다 실전에서 빠르게 흡수해요.' },
+        { icon: '🛠️', text: '사이드 프로젝트나 해커톤 참여를 추천해요. 만들어보는 경험이 이력서를 채워줘요.' },
+        { icon: '💬', text: '소통이 적은 편이라 팀플에서 오해가 생기기 쉬워요. 중간 보고를 의도적으로 늘려보세요.' },
+      ]
+    },
+    ISFP: {
+      title: '감성형 — 나만의 색깔',
+      tips: [
+        { icon: '🎨', text: '예체능, 디자인, 문화콘텐츠 분야 동아리에서 자신의 색깔을 계속 개발해 나가세요.' },
+        { icon: '🌤️', text: '경쟁적 환경에서 기가 죽기 쉬워요. 비교보다 어제의 나와 오늘의 나를 비교하세요.' },
+        { icon: '📸', text: '포트폴리오를 1학년부터 작은 것이라도 쌓아두세요. 나중에 모이면 큰 자산이 됩니다.' },
+      ]
+    },
+    ESTP: {
+      title: '행동형 — 기회를 잡아라',
+      tips: [
+        { icon: '⚡', text: '인턴, 알바, 대외활동은 남들보다 빨리 시작하세요. ESTP는 현장 경험으로 차별화돼요.' },
+        { icon: '📝', text: '충동적으로 수강신청을 변경하다 학점 계획이 꼬일 수 있어요. 장기 계획을 먼저 세우세요.' },
+        { icon: '🌍', text: '교류가 넓은 강점을 살려 다양한 학과 친구들과 어울리세요. 취업 때 전혀 다른 루트가 생겨요.' },
+      ]
+    },
+    ESFP: {
+      title: '활기형 — 현재를 즐겨라',
+      tips: [
+        { icon: '🎉', text: '공연, 이벤트, 교류 행사에서 자연스럽게 에너지를 발산하면서도 기록을 남겨두세요. 경험이 스펙이 돼요.' },
+        { icon: '📚', text: '재미없는 과목도 최소한의 기준은 맞춰야 해요. 1학년 학점은 장학금에 직결돼요.' },
+        { icon: '🔑', text: '사람들과 쉽게 친해지는 능력을 사용해 선배, 교수님, 업계 사람들과 일찍 연결하세요.' },
+      ]
+    },
+  };
+
+  // ── 혈액형 보완 팁 ──
+  const bloodBonus = {
+    A:  '✦ A형 보너스: 꼼꼼한 준비성이 강점! 미리 예습하는 습관이 강의 이해도를 2배로 올려줘요.',
+    B:  '✦ B형 보너스: 집중력이 폭발할 때 최고의 결과를 내요. 본인만의 "몰입 루틴"을 찾으세요.',
+    O:  '✦ O형 보너스: 목표 의식이 강해서 한 번 마음먹으면 끝까지 가요. 목표를 가시화해서 붙여두세요.',
+    AB: '✦ AB형 보너스: 다양한 상황에 적응력이 뛰어나요. 전공 외 다양한 경험이 특히 잘 맞아요.',
+  };
+
+  // ──────────────────────────────────────────────
+  //  상태
+  // ──────────────────────────────────────────────
+  const state = { mbti: null, blood: null };
+
+  function select(key, value) {
+    state[key] = value;
+
+    const group = key === 'mbti' ? 'mbti' : 'blood';
+    document.querySelectorAll(`[onclick^="select('${group}"]`).forEach(btn => {
+      btn.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+
+    const nextId = key === 'mbti' ? 'next1' : 'next2';
+    document.getElementById(nextId).disabled = false;
+  }
+
+  function nextStep(n) {
+    // 결과 생성
+    if (n === 3) buildResult();
+
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById(n === 5 ? 'stepSuccess' : `step${n}`).classList.add('active');
+
+    const pct = { 1: 25, 2: 50, 3: 75, 4: 100, 5: 100 }[n] || 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function buildResult() {
+    const { mbti, blood } = state;
+    const guide = guides[mbti];
+
+    document.getElementById('result-subtitle').textContent = `${mbti} + ${blood}형 맞춤 대학 생활 가이드`;
+    document.getElementById('mbtiTag').textContent = mbti;
+    document.getElementById('bloodTag').textContent = blood + '형';
+    document.getElementById('resultTitle').textContent = guide.title;
+
+    const list = document.getElementById('guideList');
+    list.innerHTML = '';
+
+    guide.tips.forEach(tip => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="icon">${tip.icon}</span><span>${tip.text}</span>`;
+      list.appendChild(li);
+    });
+
+    // 혈액형 보너스
+    const bonus = document.createElement('li');
+    bonus.style.marginTop = '12px';
+    bonus.style.paddingTop = '12px';
+    bonus.style.borderTop = '1px solid #2d2d4e';
+    bonus.style.color = '#a5b4fc';
+    bonus.innerHTML = `<span class="icon">🩸</span><span>${bloodBonus[blood]}</span>`;
+    list.appendChild(bonus);
+  }
+
+  async function submitForm() {
+    const name    = document.getElementById('inputName').value.trim();
+    const univ    = document.getElementById('inputUniv').value.trim();
+    const contact = document.getElementById('inputContact').value.trim();
+
+    if (!name || !univ || !contact) {
+      alert('이름, 대학교, 연락처를 모두 입력해 주세요.');
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '제출 중...';
+
+    const payload = {
+      timestamp: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
+      mbti:    state.mbti,
+      blood:   state.blood,
+      name,
+      univ,
+      contact,
+    };
+
+    try {
+      if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+        // 개발 모드 — 실제 제출 없이 성공 처리
+        console.log('제출 데이터 (개발 모드):', payload);
+        await new Promise(r => setTimeout(r, 800));
+      } else {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      }
+      nextStep(5);
+    } catch (err) {
+      console.error(err);
+      btn.disabled = false;
+      btn.textContent = '✨ 멘토 연결 신청하기';
+      alert('제출 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.');
+    }
+  }
+</script>
+</body>
+</html>
