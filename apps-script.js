@@ -7,7 +7,7 @@
  * 3. 배포 URL을 index.html의 APPS_SCRIPT_URL에 붙여넣기
  */
 
-const SHEET_ID   = 'YOUR_GOOGLE_SHEET_ID_HERE';  // ← 교체 필요
+const SHEET_ID   = '1yC14UwY13ub90jMmxhvlGCexmvlJPelgfV3LCrlQFNY';
 const SHEET_NAME = '응답';                         // 시트 탭 이름
 
 function doPost(e) {
@@ -20,10 +20,10 @@ function doPost(e) {
     // 시트가 없으면 자동 생성
     if (!sheet) {
       sheet = ss.insertSheet(SHEET_NAME);
-      sheet.appendRow(['타임스탬프', 'MBTI', '혈액형', '이름', '대학교', '연락처']);
+      sheet.appendRow(['타임스탬프', 'MBTI', '혈액형', '키우고 싶은 역량', '이름', '대학교', '연락처']);
 
       // 헤더 스타일
-      const header = sheet.getRange(1, 1, 1, 6);
+      const header = sheet.getRange(1, 1, 1, 7);
       header.setBackground('#4f46e5');
       header.setFontColor('#ffffff');
       header.setFontWeight('bold');
@@ -34,6 +34,7 @@ function doPost(e) {
       data.timestamp,
       data.mbti,
       data.blood,
+      data.skills,
       data.name,
       data.univ,
       data.contact,
