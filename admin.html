@@ -32,6 +32,11 @@
     .login-divider::before,.login-divider::after { content:''; flex:1; height:1px; background:var(--border); }
     .google-btn { width:100%; background:#fff; color:#1f1f1f; border:1px solid #ddd; padding:13px; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; }
     .google-btn:hover { background:#f5f5f5; }
+    .tab-row { display:flex; background:#0a0a14; border-radius:10px; padding:4px; margin-bottom:24px; }
+    .tab-btn { flex:1; padding:9px; border:none; background:transparent; color:var(--muted); font-size:14px; font-weight:600; border-radius:7px; cursor:pointer; }
+    .tab-btn.active { background:var(--card); color:var(--text); }
+    .login-section { display:block; }
+    .login-section.hidden { display:none; }
 
     /* ── APP LAYOUT ── */
     #appScreen { display:none; }
@@ -166,10 +171,27 @@
   <div class="login-card">
     <div class="logo">🎓</div>
     <h1>멘토 연결 관리자</h1>
-    <p>관리자 계정으로 로그인하세요</p>
-    <input class="f-input" type="email" id="loginEmail" placeholder="이메일" />
-    <input class="f-input" type="password" id="loginPw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()" />
-    <button class="login-btn" onclick="doLogin()">로그인</button>
+
+    <div class="tab-row">
+      <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">로그인</button>
+      <button class="tab-btn" id="tabSignup" onclick="switchTab('signup')">회원가입</button>
+    </div>
+
+    <!-- 로그인 폼 -->
+    <div class="login-section" id="secLogin">
+      <input class="f-input" type="email" id="loginEmail" placeholder="이메일" />
+      <input class="f-input" type="password" id="loginPw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()" />
+      <button class="login-btn" onclick="doLogin()">로그인</button>
+    </div>
+
+    <!-- 회원가입 폼 -->
+    <div class="login-section hidden" id="secSignup">
+      <input class="f-input" type="email" id="signupEmail" placeholder="이메일" />
+      <input class="f-input" type="password" id="signupPw" placeholder="비밀번호 (6자 이상)" />
+      <input class="f-input" type="password" id="signupPw2" placeholder="비밀번호 확인" onkeydown="if(event.key==='Enter')doSignup()" />
+      <button class="login-btn" onclick="doSignup()">계정 만들기</button>
+    </div>
+
     <div class="login-divider">또는</div>
     <button class="google-btn" onclick="doGoogleLogin()">
       <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
@@ -373,6 +395,32 @@
       await auth.signInWithEmailAndPassword(email, pw);
     } catch(e) {
       const msgs = { 'auth/wrong-password':'비밀번호가 틀렸어요', 'auth/user-not-found':'등록된 계정이 없어요', 'auth/invalid-credential':'이메일 또는 비밀번호를 확인하세요' };
+      err.textContent = msgs[e.code] || e.message;
+    }
+  }
+
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('tabLogin').classList.toggle('active', isLogin);
+    document.getElementById('tabSignup').classList.toggle('active', !isLogin);
+    document.getElementById('secLogin').classList.toggle('hidden', !isLogin);
+    document.getElementById('secSignup').classList.toggle('hidden', isLogin);
+    document.getElementById('loginErr').textContent = '';
+  }
+
+  async function doSignup() {
+    const email = document.getElementById('signupEmail').value.trim();
+    const pw    = document.getElementById('signupPw').value;
+    const pw2   = document.getElementById('signupPw2').value;
+    const err   = document.getElementById('loginErr');
+    err.textContent = '';
+    if (!email || !pw) return err.textContent = '이메일과 비밀번호를 입력해 주세요';
+    if (pw.length < 6)  return err.textContent = '비밀번호는 6자 이상이어야 해요';
+    if (pw !== pw2)     return err.textContent = '비밀번호가 일치하지 않아요';
+    try {
+      await auth.createUserWithEmailAndPassword(email, pw);
+    } catch(e) {
+      const msgs = { 'auth/email-already-in-use':'이미 등록된 이메일이에요', 'auth/invalid-email':'이메일 형식이 올바르지 않아요', 'auth/weak-password':'비밀번호가 너무 약해요' };
       err.textContent = msgs[e.code] || e.message;
     }
   }
