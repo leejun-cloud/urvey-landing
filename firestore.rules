@@ -1,0 +1,25 @@
+// Firebase Console → Firestore → 규칙 탭에 아래 내용을 붙여넣고 저장하세요.
+// (현재 테스트 모드로 열려있으면 30일 후 닫힙니다. 반드시 아래 규칙으로 교체하세요.)
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 설문 응답: 누구나 등록 가능, 읽기/수정/삭제는 로그인한 관리자만
+    match /submissions/{id} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+
+      // 활동 기록: 로그인한 관리자만 읽기/쓰기
+      match /activities/{actId} {
+        allow read, write: if request.auth != null;
+      }
+    }
+
+    // 관리자 프로필 (레퍼럴 코드 등): 로그인한 관리자만 접근, 본인 문서만 수정
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}

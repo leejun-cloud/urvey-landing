@@ -502,7 +502,25 @@
 
 <footer>© 2025 대학생활 멘토 연결 프로젝트</footer>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
 <script>
+  // ── Firebase 초기화 ──
+  firebase.initializeApp({
+    apiKey: "AIzaSyCk4ZHj2xTgY1JLcnXf9YadfWV__IrPw9o",
+    authDomain: "mentor-web00.firebaseapp.com",
+    projectId: "mentor-web00",
+    storageBucket: "mentor-web00.firebasestorage.app",
+    messagingSenderId: "720121403258",
+    appId: "1:720121403258:web:33a0222743831b6277e8c3"
+  });
+  const db = firebase.firestore();
+
+  // URL에서 레퍼럴 코드 캡처
+  const refCode = new URLSearchParams(window.location.search).get('ref') || '';
+
   const FORMSPREE_URL = 'https://formspree.io/f/mvzwzjyy';
 
   // ─────────────────────────────────────────────────────────────────
@@ -809,25 +827,58 @@
       name, univ, contact,
     };
 
+    const m = mbtiData[payload.mbti];
+    const b = bloodData[payload.blood];
+
     const res = await fetch(FORMSPREE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
-        타임스탬프: payload.timestamp,
-        MBTI:      payload.mbti,
-        혈액형:    payload.blood,
-        역량:      payload.skills,
-        이름:      payload.name,
-        대학교:    payload.univ,
-        연락처:    payload.contact,
+        타임스탬프:   payload.timestamp,
+        MBTI:         payload.mbti,
+        혈액형:       payload.blood,
+        역량:         payload.skills,
+        이름:         payload.name,
+        대학교:       payload.univ,
+        연락처:       payload.contact,
+        MBTI_콤보:    `${m.combo} × ${b.title}`,
+        핵심강점:     m.strengths.join(', '),
+        주의사항:     m.caution,
+        성향분석:     m.personality,
+        혈액형특성:   b.personality,
+        대학전략_학업:    m.strategies[0]?.text || '',
+        대학전략_인간관계: m.strategies[1]?.text || '',
+        대학전략_커리어:  m.strategies[2]?.text || '',
+        대학전략_주의:    m.strategies[3]?.text || '',
       }),
     });
 
-    if (res.ok) {
-      nextStep(6);
-    } else {
-      throw new Error('formspree error');
+    if (!res.ok) throw new Error('formspree error');
+
+    // ── Firestore 저장 (백그라운드, 실패해도 완료 처리) ──
+    try {
+      await db.collection('submissions').add({
+        name, univ, contact,
+        mbti:            payload.mbti,
+        blood:           payload.blood,
+        skills:          payload.skills,
+        referredBy:      refCode,
+        mbtiCombo:       `${m.combo} × ${b.title}`,
+        strengths:       m.strengths.join(', '),
+        caution:         m.caution,
+        personality:     m.personality,
+        bloodPersonality: b.personality,
+        strategies:      m.strategies,
+        source:          'form',
+        status:          'new',
+        timestamp:       payload.timestamp,
+        createdAt:       firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    } catch(fsErr) {
+      console.warn('Firestore 저장 실패 (Formspree는 성공):', fsErr);
     }
+
+    nextStep(6);
   }
 </script>
 </body>

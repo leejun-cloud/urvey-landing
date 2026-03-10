@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>멘토 연결 — 관리자</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #6366f1; --primary-dark: #4f46e5;
+      --bg: #0f0f1a; --sidebar: #13132a; --card: #1a1a2e;
+      --text: #f1f5f9; --muted: #94a3b8; --border: #2d2d4e;
+      --green: #10b981; --red: #ef4444;
+    }
+    body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    /* ── LOGIN ── */
+    #loginScreen {
+      display:flex; align-items:center; justify-content:center; min-height:100vh;
+      background: radial-gradient(ellipse at 20% 50%,#3730a333 0%,transparent 60%), var(--bg);
+    }
+    .login-card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:40px; width:100%; max-width:380px; text-align:center; }
+    .login-card .logo { font-size:48px; margin-bottom:16px; }
+    .login-card h1 { font-size:22px; font-weight:800; margin-bottom:6px; }
+    .login-card p { color:var(--muted); font-size:14px; margin-bottom:28px; }
+    .f-input { width:100%; background:#0a0a14; border:2px solid var(--border); color:var(--text); padding:13px 16px; border-radius:12px; font-size:15px; outline:none; margin-bottom:10px; display:block; }
+    .f-input:focus { border-color:var(--primary); }
+    .login-btn { width:100%; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:white; border:none; padding:14px; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; }
+    .login-btn:hover { opacity:.9; }
+    .login-err { color:#f87171; font-size:13px; margin-top:10px; min-height:18px; }
+
+    /* ── APP LAYOUT ── */
+    #appScreen { display:none; }
+    .layout { display:flex; min-height:100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width:270px; flex-shrink:0; background:var(--sidebar); border-right:1px solid var(--border); display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto; }
+    .sb-hd { padding:18px 20px; border-bottom:1px solid var(--border); }
+    .sb-hd h2 { font-size:14px; font-weight:800; }
+    .sb-user { font-size:12px; color:var(--muted); margin-top:3px; }
+    .sb-sec { padding:16px 20px; border-bottom:1px solid var(--border); }
+    .sb-lbl { font-size:11px; font-weight:700; color:var(--primary); letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+    .qr-box { text-align:center; margin-bottom:12px; }
+    .qr-box img { border-radius:8px; border:2px solid var(--border); }
+    .ref-row { display:flex; gap:6px; margin-bottom:8px; }
+    .ref-inp { flex:1; background:#0a0a14; border:1px solid var(--border); color:var(--text); padding:8px 10px; border-radius:8px; font-size:12px; outline:none; }
+    .ref-inp:focus { border-color:var(--primary); }
+    .ref-save { background:var(--primary); color:white; border:none; padding:8px 12px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
+    .copy-btn { width:100%; background:transparent; border:1px solid var(--border); color:var(--muted); padding:8px; border-radius:8px; font-size:12px; cursor:pointer; }
+    .copy-btn:hover { border-color:var(--primary); color:var(--text); }
+    .sb-stat { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .sb-stat .lbl { font-size:13px; color:var(--muted); }
+    .sb-stat .num { font-size:18px; font-weight:800; }
+    .sb-stat .num.p { color:var(--primary); }
+    .sb-stat .num.g { color:var(--green); }
+    .sb-nav { padding:12px; flex:1; }
+    .nav-item { width:100%; text-align:left; background:transparent; border:none; color:var(--muted); padding:10px 12px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px; margin-bottom:2px; }
+    .nav-item:hover { background:var(--card); color:var(--text); }
+    .nav-item.active { background:var(--card); color:var(--text); }
+    .logout-area { padding:12px; }
+    .logout-btn { width:100%; background:transparent; border:1px solid var(--border); color:var(--muted); padding:10px; border-radius:8px; font-size:13px; cursor:pointer; }
+    .logout-btn:hover { border-color:var(--red); color:var(--red); }
+
+    /* ── MAIN ── */
+    .main { flex:1; padding:28px 32px; overflow-y:auto; min-width:0; }
+    .page { display:none; }
+    .page.active { display:block; }
+    .pg-title { font-size:22px; font-weight:800; margin-bottom:4px; }
+    .pg-sub { color:var(--muted); font-size:14px; margin-bottom:22px; }
+
+    /* filter */
+    .filter-row { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; align-items:center; }
+    .f-btn { background:var(--card); border:1px solid var(--border); color:var(--muted); padding:6px 14px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; }
+    .f-btn.active { background:var(--primary); border-color:var(--primary); color:white; }
+    .search-inp { background:var(--card); border:1px solid var(--border); color:var(--text); padding:8px 14px; border-radius:100px; font-size:13px; outline:none; min-width:160px; margin-left:auto; }
+    .search-inp:focus { border-color:var(--primary); }
+
+    /* table */
+    .tbl-card { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+    table { width:100%; border-collapse:collapse; }
+    th { background:#1e1e3a; color:var(--muted); font-size:12px; font-weight:700; padding:11px 16px; text-align:left; white-space:nowrap; }
+    td { padding:13px 16px; border-top:1px solid var(--border); font-size:14px; vertical-align:middle; }
+    tbody tr:hover td { background:#1e1e3a; cursor:pointer; }
+    .chip-m { background:linear-gradient(135deg,var(--primary),#8b5cf6); color:white; font-size:11px; font-weight:700; padding:2px 8px; border-radius:100px; display:inline-block; }
+    .chip-b { background:#7f1d1d; color:#fca5a5; font-size:11px; font-weight:600; padding:2px 7px; border-radius:100px; display:inline-block; margin-left:3px; }
+    .chip-mine { background:#312e81; color:#a5b4fc; font-size:10px; padding:1px 7px; border-radius:100px; display:inline-block; margin-left:4px; }
+    .st-chip { font-size:11px; font-weight:700; padding:3px 9px; border-radius:100px; display:inline-block; }
+    .st-new { background:#1e1e3a; color:var(--muted); }
+    .st-contacting { background:#172554; color:#93c5fd; }
+    .st-matched { background:#052e16; color:#6ee7b7; }
+    .st-hold { background:#451a03; color:#fbbf24; }
+    .empty-row td { text-align:center; color:var(--muted); padding:48px; }
+
+    /* add form */
+    .form-2col { display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:680px; }
+    .fg { }
+    .fg.full { grid-column:1/-1; }
+    .fg label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px; }
+    .fg input,.fg select,.fg textarea { width:100%; background:var(--card); border:2px solid var(--border); color:var(--text); padding:11px 14px; border-radius:10px; font-size:14px; outline:none; font-family:inherit; }
+    .fg input:focus,.fg select:focus,.fg textarea:focus { border-color:var(--primary); }
+    .fg select option { background:var(--card); }
+    .skill-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+    .sk-btn { background:var(--card); border:1px solid var(--border); color:var(--muted); padding:8px 10px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; text-align:left; display:flex; align-items:center; gap:6px; }
+    .sk-btn.on { border-color:var(--green); color:#6ee7b7; background:#052e16; }
+    .sk-dot { width:12px; height:12px; border-radius:50%; border:1px solid var(--border); flex-shrink:0; }
+    .sk-btn.on .sk-dot { background:var(--green); border-color:var(--green); }
+    .submit-btn { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:white; border:none; padding:13px 32px; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; margin-top:8px; }
+
+    /* ── DETAIL PANEL ── */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; }
+    .overlay.open { display:block; }
+    .dp { position:fixed; top:0; right:-580px; width:560px; height:100vh; background:var(--card); border-left:1px solid var(--border); z-index:101; transition:right .3s ease; display:flex; flex-direction:column; overflow:hidden; }
+    .dp.open { right:0; }
+    .dp-hd { padding:18px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .dp-hd h3 { font-size:18px; font-weight:800; }
+    .dp-close { background:transparent; border:1px solid var(--border); color:var(--muted); width:30px; height:30px; border-radius:8px; cursor:pointer; font-size:14px; }
+    .dp-close:hover { border-color:var(--red); color:var(--red); }
+    .dp-body { flex:1; overflow-y:auto; padding:20px 24px; }
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+    .info-cell { background:#1e1e3a; border-radius:8px; padding:10px 14px; }
+    .info-cell .lbl { font-size:11px; color:var(--muted); font-weight:700; margin-bottom:3px; }
+    .info-cell .val { font-size:14px; font-weight:600; }
+    .analysis-box { background:#1a1a3a; border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:14px; cursor:pointer; }
+    .analysis-box .ah { font-size:13px; font-weight:700; color:var(--primary); display:flex; justify-content:space-between; }
+    .a-content { display:none; margin-top:12px; font-size:13px; color:#cbd5e1; line-height:1.75; }
+    .a-content.open { display:block; }
+    .tl-hd { font-size:12px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+    .tl-item { display:flex; gap:10px; margin-bottom:14px; }
+    .tl-dot { width:30px; height:30px; border-radius:50%; background:#1a1a3a; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; margin-top:2px; }
+    .tl-card { flex:1; background:#1a1a3a; border:1px solid var(--border); border-radius:10px; padding:10px 14px; }
+    .tl-type { font-size:12px; font-weight:700; color:var(--primary); margin-bottom:4px; }
+    .tl-text { font-size:13px; color:var(--text); line-height:1.6; }
+    .tl-date { font-size:11px; color:var(--muted); margin-top:5px; }
+    .no-act { color:var(--muted); font-size:13px; text-align:center; padding:20px 0; }
+
+    /* detail footer */
+    .dp-ft { border-top:1px solid var(--border); padding:16px 24px; flex-shrink:0; }
+    .dp-ft h4 { font-size:13px; font-weight:700; margin-bottom:10px; }
+    .act-types { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .at-btn { background:#1a1a3a; border:1px solid var(--border); color:var(--muted); padding:5px 10px; border-radius:100px; font-size:12px; font-weight:600; cursor:pointer; }
+    .at-btn.sel { border-color:var(--primary); color:var(--primary); background:#1e1b4b; }
+    .act-ta { width:100%; background:#0a0a14; border:1px solid var(--border); color:var(--text); padding:9px 12px; border-radius:8px; font-size:13px; font-family:inherit; resize:vertical; min-height:56px; outline:none; margin-bottom:8px; }
+    .act-ta:focus { border-color:var(--primary); }
+    .ft-row { display:flex; gap:8px; align-items:center; }
+    .act-add { background:var(--green); color:white; border:none; padding:9px 18px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; }
+    .status-sel { background:var(--card); border:1px solid var(--border); color:var(--text); padding:8px 10px; border-radius:8px; font-size:13px; cursor:pointer; outline:none; margin-left:auto; }
+
+    @media (max-width:900px) {
+      .layout { flex-direction:column; }
+      .sidebar { width:100%; height:auto; position:relative; }
+      .dp { width:100%; right:-100%; }
+      .dp.open { right:0; }
+      .form-2col { grid-template-columns:1fr; }
+      .fg.full { grid-column:1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="logo">🎓</div>
+    <h1>멘토 연결 관리자</h1>
+    <p>관리자 계정으로 로그인하세요</p>
+    <input class="f-input" type="email" id="loginEmail" placeholder="이메일" />
+    <input class="f-input" type="password" id="loginPw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()" />
+    <button class="login-btn" onclick="doLogin()">로그인</button>
+    <p class="login-err" id="loginErr"></p>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="appScreen">
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sb-hd">
+        <h2>🎓 멘토 연결 관리자</h2>
+        <div class="sb-user" id="sbUser"></div>
+      </div>
+
+      <div class="sb-sec">
+        <div class="sb-lbl">📲 나의 공유 링크</div>
+        <div class="qr-box"><img id="qrImg" src="" width="128" height="128" alt="QR" /></div>
+        <div class="ref-row">
+          <input class="ref-inp" id="refInp" type="text" placeholder="나만의 코드 (영문)" maxlength="20" />
+          <button class="ref-save" onclick="saveRefCode()">저장</button>
+        </div>
+        <button class="copy-btn" onclick="copyLink()">🔗 링크 복사</button>
+      </div>
+
+      <div class="sb-sec">
+        <div class="sb-lbl">통계</div>
+        <div class="sb-stat"><span class="lbl">전체 신청자</span><span class="num p" id="stTotal">0</span></div>
+        <div class="sb-stat"><span class="lbl">내 연결</span><span class="num" id="stMine">0</span></div>
+        <div class="sb-stat"><span class="lbl">매칭 완료</span><span class="num g" id="stMatch">0</span></div>
+      </div>
+
+      <div class="sb-nav">
+        <button class="nav-item active" id="nav-list" onclick="showPage('listPage','nav-list')">📋 전체 현황</button>
+        <button class="nav-item" id="nav-add" onclick="showPage('addPage','nav-add')">➕ 수동 입력</button>
+      </div>
+
+      <div class="logout-area">
+        <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- LIST PAGE -->
+      <div class="page active" id="listPage">
+        <div class="pg-title">신청자 현황</div>
+        <div class="pg-sub" id="listSub">불러오는 중...</div>
+        <div class="filter-row">
+          <button class="f-btn active" onclick="setFilter('all',this)">전체</button>
+          <button class="f-btn" onclick="setFilter('mine',this)">내 연결</button>
+          <button class="f-btn" onclick="setFilter('new',this)">신규</button>
+          <button class="f-btn" onclick="setFilter('contacting',this)">연락 중</button>
+          <button class="f-btn" onclick="setFilter('matched',this)">매칭 완료</button>
+          <button class="f-btn" onclick="setFilter('hold',this)">보류</button>
+          <input class="search-inp" type="text" placeholder="이름·학교 검색" oninput="setSearch(this.value)" />
+        </div>
+        <div class="tbl-card">
+          <table>
+            <thead>
+              <tr>
+                <th>이름</th><th>학교</th><th>MBTI·혈액형</th>
+                <th>역량</th><th>연락처</th><th>상태</th><th>등록일</th>
+              </tr>
+            </thead>
+            <tbody id="listBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADD PAGE -->
+      <div class="page" id="addPage">
+        <div class="pg-title">수동 입력</div>
+        <div class="pg-sub">직접 만난 사람을 등록해요</div>
+        <div class="form-2col">
+          <div class="fg"><label>이름 *</label><input type="text" id="aName" placeholder="홍길동" /></div>
+          <div class="fg"><label>대학교 / 학교 *</label><input type="text" id="aUniv" placeholder="연세대학교" /></div>
+          <div class="fg"><label>연락처 *</label><input type="text" id="aContact" placeholder="010-0000-0000" /></div>
+          <div class="fg">
+            <label>MBTI</label>
+            <select id="aMbti">
+              <option value="">선택 안 함</option>
+              <option>INTJ</option><option>INTP</option><option>ENTJ</option><option>ENTP</option>
+              <option>INFJ</option><option>INFP</option><option>ENFJ</option><option>ENFP</option>
+              <option>ISTJ</option><option>ISFJ</option><option>ESTJ</option><option>ESFJ</option>
+              <option>ISTP</option><option>ISFP</option><option>ESTP</option><option>ESFP</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>혈액형</label>
+            <select id="aBlood">
+              <option value="">선택 안 함</option>
+              <option>A</option><option>B</option><option>O</option><option>AB</option>
+            </select>
+          </div>
+          <div class="fg full">
+            <label>키우고 싶은 역량</label>
+            <div class="skill-grid" id="addSkillGrid"></div>
+          </div>
+          <div class="fg full">
+            <label>첫 번째 메모 (선택)</label>
+            <textarea id="aMemo" rows="3" placeholder="만난 경위, 특이사항 등..."></textarea>
+          </div>
+          <div class="fg full">
+            <button class="submit-btn" onclick="addManual()">➕ 등록하기</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="overlay" id="overlay" onclick="closeDetail()"></div>
+<div class="dp" id="dp">
+  <div class="dp-hd">
+    <h3 id="dpName">-</h3>
+    <button class="dp-close" onclick="closeDetail()">✕</button>
+  </div>
+  <div class="dp-body" id="dpBody"></div>
+  <div class="dp-ft">
+    <h4>활동 추가</h4>
+    <div class="act-types" id="actTypes"></div>
+    <textarea class="act-ta" id="actTa" placeholder="내용을 입력하세요..."></textarea>
+    <div class="ft-row">
+      <button class="act-add" onclick="addActivity()">추가</button>
+      <select class="status-sel" id="statusSel" onchange="changeStatus(this.value)">
+        <option value="new">신규</option>
+        <option value="contacting">연락 중</option>
+        <option value="matched">매칭 완료</option>
+        <option value="hold">보류</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+  // ── Firebase ──
+  firebase.initializeApp({
+    apiKey: "AIzaSyCk4ZHj2xTgY1JLcnXf9YadfWV__IrPw9o",
+    authDomain: "mentor-web00.firebaseapp.com",
+    projectId: "mentor-web00",
+    storageBucket: "mentor-web00.firebasestorage.app",
+    messagingSenderId: "720121403258",
+    appId: "1:720121403258:web:33a0222743831b6277e8c3"
+  });
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+  const fv   = firebase.firestore.FieldValue;
+
+  const BASE_URL  = 'https://leejun-cloud.github.io/urvey-landing/';
+  const SKILLS    = ['영어회화·외국어','토플·토익 점수','관계·소통 역량','SNS 콘텐츠 제작','AI 프롬프트 활용','AI 코딩','AI 동영상 제작','취업·인턴 준비','창업·사이드프로젝트','학점 관리·공부법'];
+  const ACT_TYPES = ['📞 첫 연락','💬 반응 확인','📅 미팅','🤝 멘토 매칭','📲 2차 연락','⏸️ 보류','✅ 완료','📝 메모'];
+  const ST_MAP    = { new:['st-new','신규'], contacting:['st-contacting','연락 중'], matched:['st-matched','매칭 완료'], hold:['st-hold','보류'] };
+
+  let me = null, myRef = '', allDocs = [], curFilter = 'all', curSearch = '', curId = null, curActType = '';
+
+  // 스킬 체크박스
+  document.getElementById('addSkillGrid').innerHTML = SKILLS.map(s =>
+    `<button class="sk-btn" data-skill="${s}" onclick="toggleSk(this)"><span class="sk-dot"></span>${s}</button>`
+  ).join('');
+
+  // 활동 유형 버튼
+  document.getElementById('actTypes').innerHTML = ACT_TYPES.map(t =>
+    `<button class="at-btn" onclick="pickAct(this,'${t}')">${t}</button>`
+  ).join('');
+
+  // ── AUTH ──
+  auth.onAuthStateChanged(async user => {
+    if (user) {
+      me = user;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appScreen').style.display  = 'block';
+      document.getElementById('sbUser').textContent = user.email;
+      await loadProfile();
+      await loadSubmissions();
+    } else {
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('appScreen').style.display  = 'none';
+    }
+  });
+
+  async function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pw    = document.getElementById('loginPw').value;
+    const err   = document.getElementById('loginErr');
+    err.textContent = '';
+    try {
+      await auth.signInWithEmailAndPassword(email, pw);
+    } catch(e) {
+      const msgs = { 'auth/wrong-password':'비밀번호가 틀렸어요', 'auth/user-not-found':'등록된 계정이 없어요', 'auth/invalid-credential':'이메일 또는 비밀번호를 확인하세요' };
+      err.textContent = msgs[e.code] || e.message;
+    }
+  }
+  function doLogout() { auth.signOut(); }
+
+  // ── USER PROFILE ──
+  async function loadProfile() {
+    const ref = db.collection('users').doc(me.uid);
+    const doc = await ref.get();
+    if (doc.exists) {
+      myRef = doc.data().refCode || '';
+    } else {
+      myRef = me.email.split('@')[0].replace(/[^a-z0-9_-]/gi,'').toLowerCase();
+      await ref.set({ email: me.email, refCode: myRef, createdAt: fv.serverTimestamp() });
+    }
+    document.getElementById('refInp').value = myRef;
+    updateShareUI();
+  }
+
+  async function saveRefCode() {
+    const code = document.getElementById('refInp').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');
+    if (!code) return alert('코드를 입력해 주세요');
+    const snap = await db.collection('users').where('refCode','==',code).get();
+    if (snap.docs.some(d => d.id !== me.uid)) return alert('이미 사용 중인 코드예요');
+    await db.collection('users').doc(me.uid).update({ refCode: code });
+    myRef = code;
+    updateShareUI();
+    renderTable();
+    updateStats();
+    alert('저장됐어요!');
+  }
+
+  function getShareURL() { return BASE_URL + (myRef ? `?ref=${myRef}` : ''); }
+
+  function updateShareUI() {
+    const url = getShareURL();
+    document.getElementById('qrImg').src =
+      `https://api.qrserver.com/v1/create-qr-code/?size=128x128&color=818cf8&bgcolor=13132a&data=${encodeURIComponent(url)}`;
+    document.getElementById('refInp').value = myRef;
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(getShareURL()).then(() => {
+      const btn = event.currentTarget;
+      btn.textContent = '✅ 복사됐어요!';
+      setTimeout(() => btn.textContent = '🔗 링크 복사', 2000);
+    });
+  }
+
+  // ── SUBMISSIONS ──
+  async function loadSubmissions() {
+    const snap = await db.collection('submissions').orderBy('createdAt','desc').get();
+    allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderTable();
+    updateStats();
+  }
+
+  function updateStats() {
+    document.getElementById('stTotal').textContent  = allDocs.length;
+    document.getElementById('stMine').textContent   = myRef ? allDocs.filter(d => d.referredBy === myRef).length : 0;
+    document.getElementById('stMatch').textContent  = allDocs.filter(d => d.status === 'matched').length;
+    document.getElementById('listSub').textContent  = `총 ${allDocs.length}명이 신청했어요`;
+  }
+
+  function setFilter(f, el) {
+    curFilter = f;
+    document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderTable();
+  }
+  function setSearch(q) { curSearch = q.toLowerCase(); renderTable(); }
+
+  function renderTable() {
+    let rows = allDocs;
+    if (curFilter === 'mine')       rows = rows.filter(r => myRef && r.referredBy === myRef);
+    else if (curFilter !== 'all')   rows = rows.filter(r => (r.status || 'new') === curFilter);
+    if (curSearch) rows = rows.filter(r =>
+      (r.name||'').toLowerCase().includes(curSearch) ||
+      (r.univ||'').toLowerCase().includes(curSearch) ||
+      (r.contact||'').toLowerCase().includes(curSearch)
+    );
+    const tbody = document.getElementById('listBody');
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">신청자가 없어요</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(r => {
+      const st = r.status || 'new';
+      const [cls, lbl] = ST_MAP[st] || ST_MAP.new;
+      const skills = (r.skills||'').split(',').slice(0,2).map(s => `<span style="font-size:11px;color:var(--muted)">${s.trim()}</span>`).join(' ');
+      const mine = (myRef && r.referredBy === myRef) ? '<span class="chip-mine">내연결</span>' : '';
+      const d = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString('ko-KR') : (r.timestamp||'').substring(0,10);
+      return `<tr onclick="openDetail('${r.id}')">
+        <td><strong>${r.name||'-'}</strong>${mine}</td>
+        <td>${r.univ||'-'}</td>
+        <td><span class="chip-m">${r.mbti||'-'}</span><span class="chip-b">${r.blood||'-'}형</span></td>
+        <td>${skills}</td>
+        <td style="font-size:12px;color:var(--muted)">${r.contact||'-'}</td>
+        <td><span class="st-chip ${cls}">${lbl}</span></td>
+        <td style="font-size:12px;color:var(--muted)">${d}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── DETAIL PANEL ──
+  async function openDetail(docId) {
+    curId = docId;
+    const sub = allDocs.find(s => s.id === docId);
+    if (!sub) return;
+    document.getElementById('dpName').textContent = sub.name || '-';
+    document.getElementById('overlay').classList.add('open');
+    document.getElementById('dp').classList.add('open');
+    document.getElementById('statusSel').value = sub.status || 'new';
+    curActType = '';
+    document.querySelectorAll('.at-btn').forEach(b => b.classList.remove('sel'));
+    document.getElementById('actTa').value = '';
+
+    const mine = (myRef && sub.referredBy === myRef) ? `<span class="chip-mine" style="margin-left:6px">내연결</span>` : '';
+    document.getElementById('dpBody').innerHTML = `
+      <div class="info-grid">
+        <div class="info-cell"><div class="lbl">학교</div><div class="val">${sub.univ||'-'}</div></div>
+        <div class="info-cell"><div class="lbl">연락처</div><div class="val">${sub.contact||'-'}</div></div>
+        <div class="info-cell"><div class="lbl">MBTI · 혈액형</div><div class="val"><span class="chip-m">${sub.mbti||'-'}</span> <span class="chip-b">${sub.blood||'-'}형</span></div></div>
+        <div class="info-cell"><div class="lbl">소개경로${mine}</div><div class="val" style="font-size:12px;color:var(--muted)">${sub.referredBy||'직접'}</div></div>
+        <div class="info-cell" style="grid-column:1/-1"><div class="lbl">역량</div><div class="val" style="font-size:12px">${sub.skills||'-'}</div></div>
+      </div>
+      ${sub.mbtiCombo ? `
+      <div class="analysis-box" onclick="toggleAna(this)">
+        <div class="ah">🧠 MBTI 분석 결과 <span>▼</span></div>
+        <div class="a-content">
+          <strong>${sub.mbtiCombo}</strong><br/><br/>
+          ${sub.personality||''}<br/><br/>
+          <span style="color:#6ee7b7">🩸 혈액형 특성:</span><br/>${sub.bloodPersonality||''}<br/><br/>
+          <span style="color:#a5b4fc">⚡ 핵심 강점:</span> ${sub.strengths||''}
+          ${sub.caution ? `<br/><span style="color:#fca5a5">⚠️ 주의:</span> ${sub.caution}` : ''}
+        </div>
+      </div>` : ''}
+      <div class="tl-hd">활동 기록</div>
+      <div id="timeline"><div class="no-act">불러오는 중...</div></div>
+    `;
+
+    const actSnap = await db.collection('submissions').doc(docId)
+      .collection('activities').orderBy('createdAt','desc').get();
+    const tl = document.getElementById('timeline');
+    if (actSnap.empty) {
+      tl.innerHTML = '<div class="no-act">아직 기록이 없어요</div>';
+    } else {
+      tl.innerHTML = actSnap.docs.map(d => {
+        const a = d.data();
+        const date = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleString('ko-KR') : '';
+        const emoji = a.type?.split(' ')[0] || '📝';
+        return `<div class="tl-item">
+          <div class="tl-dot">${emoji}</div>
+          <div class="tl-card">
+            <div class="tl-type">${a.type||''}</div>
+            <div class="tl-text">${a.content||''}</div>
+            <div class="tl-date">${date}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  function closeDetail() {
+    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('dp').classList.remove('open');
+    curId = null;
+  }
+
+  function toggleAna(el) { el.querySelector('.a-content').classList.toggle('open'); }
+
+  async function changeStatus(status) {
+    if (!curId) return;
+    await db.collection('submissions').doc(curId).update({ status });
+    const s = allDocs.find(d => d.id === curId);
+    if (s) s.status = status;
+    renderTable();
+    updateStats();
+  }
+
+  function pickAct(btn, type) {
+    document.querySelectorAll('.at-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    curActType = type;
+  }
+
+  async function addActivity() {
+    if (!curId)       return alert('대상을 선택해 주세요');
+    if (!curActType)  return alert('활동 유형을 선택해 주세요');
+    const content = document.getElementById('actTa').value.trim();
+    if (!content)     return alert('내용을 입력해 주세요');
+    await db.collection('submissions').doc(curId).collection('activities').add({
+      type: curActType, content,
+      createdAt: fv.serverTimestamp(), createdBy: me.uid,
+    });
+    document.getElementById('actTa').value = '';
+    curActType = '';
+    document.querySelectorAll('.at-btn').forEach(b => b.classList.remove('sel'));
+    await openDetail(curId);
+  }
+
+  // ── MANUAL ADD ──
+  function toggleSk(btn) { btn.classList.toggle('on'); }
+
+  async function addManual() {
+    const name    = document.getElementById('aName').value.trim();
+    const univ    = document.getElementById('aUniv').value.trim();
+    const contact = document.getElementById('aContact').value.trim();
+    if (!name || !univ || !contact) return alert('이름, 학교, 연락처는 필수예요');
+    const mbti   = document.getElementById('aMbti').value;
+    const blood  = document.getElementById('aBlood').value;
+    const skills = [...document.querySelectorAll('#addSkillGrid .on')].map(b => b.dataset.skill).join(', ');
+    const memo   = document.getElementById('aMemo').value.trim();
+    const ref = await db.collection('submissions').add({
+      name, univ, contact, mbti, blood, skills,
+      referredBy: myRef, source: 'manual', status: 'new',
+      timestamp: new Date().toLocaleString('ko-KR', { timeZone:'Asia/Seoul' }),
+      createdAt: fv.serverTimestamp(),
+    });
+    if (memo) {
+      await ref.collection('activities').add({
+        type: '📝 메모', content: memo,
+        createdAt: fv.serverTimestamp(), createdBy: me.uid,
+      });
+    }
+    ['aName','aUniv','aContact','aMemo'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('aMbti').value = '';
+    document.getElementById('aBlood').value = '';
+    document.querySelectorAll('#addSkillGrid .on').forEach(b => b.classList.remove('on'));
+    alert(`${name}님을 등록했어요!`);
+    await loadSubmissions();
+    showPage('listPage','nav-list');
+  }
+
+  // ── NAV ──
+  function showPage(pageId, navId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById(navId).classList.add('active');
+  }
+</script>
+</body>
+</html>
