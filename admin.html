@@ -349,13 +349,8 @@
       </div>
 
       <div class="sb-sec">
-        <div class="sb-lbl">🤖 Gemini AI 설정</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">AI 기능(상담 분석·녹음 요약)에 필요해요</div>
-        <div class="gemini-key-row">
-          <input class="gemini-key-inp" type="password" id="geminiKeyInp" placeholder="AIza..." />
-          <button class="gemini-key-save" onclick="saveGeminiKey()">저장</button>
-        </div>
-        <div id="geminiKeyStatus" style="font-size:11px;margin-top:5px;"></div>
+        <div class="sb-lbl">🤖 Gemini AI 상태</div>
+        <div style="font-size:11px;color:#6ee7b7;margin-top:5px;">✅ Cloudflare 안전 연결됨</div>
       </div>
 
       <div class="logout-area">
@@ -1444,41 +1439,14 @@ ${summaries.join('\n')}
   }
 
   // ═══════════════════════════════════════════════════════════
-  //  GEMINI API KEY
-  // ═══════════════════════════════════════════════════════════
-  function saveGeminiKey() {
-    const key = document.getElementById('geminiKeyInp').value.trim();
-    if (!key) return;
-    localStorage.setItem('gemini_api_key', key);
-    const st = document.getElementById('geminiKeyStatus');
-    st.textContent = '✅ 저장됨';
-    st.style.color = '#6ee7b7';
-    setTimeout(() => { st.textContent = ''; }, 2500);
-  }
 
-  function getGeminiKey() {
-    return localStorage.getItem('gemini_api_key') || 'AIzaSyBGfi3tAGWwW2ItU4zht2K7v4gUJ_Q6fvI';
-  }
-
-  // load on page init
-  window.addEventListener('DOMContentLoaded', () => {
-    const k = getGeminiKey();
-    if (k) {
-      document.getElementById('geminiKeyInp').value = k;
-      const st = document.getElementById('geminiKeyStatus');
-      st.textContent = '✅ API Key 설정됨';
-      st.style.color = '#6ee7b7';
-    }
-  });
 
   // ═══════════════════════════════════════════════════════════
   //  GEMINI API HELPERS
   // ═══════════════════════════════════════════════════════════
   async function callGemini(prompt) {
-    const key = getGeminiKey();
-    if (!key) throw new Error('Gemini API Key가 설정되지 않았어요. 사이드바에서 키를 입력해 주세요.');
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${key}`,
+      `https://survey-gemini-proxy.leejun-api.workers.dev/v1beta/models/gemini-2.0-flash-lite:generateContent`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1491,10 +1459,8 @@ ${summaries.join('\n')}
   }
 
   async function callGeminiAudio(audioBase64, mimeType, contextPrompt) {
-    const key = getGeminiKey();
-    if (!key) throw new Error('Gemini API Key가 설정되지 않았어요. 사이드바에서 키를 입력해 주세요.');
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+      `https://survey-gemini-proxy.leejun-api.workers.dev/v1beta/models/gemini-1.5-flash:generateContent`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
