@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>멘토 연결 — 관리자</title>
@@ -778,6 +780,9 @@
   ).join('');
 
   // ── AUTH ──
+  // Google redirect 결과 처리 (signInWithRedirect 후 복귀 시)
+  auth.getRedirectResult().catch(() => {});
+
   auth.onAuthStateChanged(async user => {
     if (user) {
       me = user;
@@ -836,7 +841,7 @@
     err.textContent = '';
     try {
       const provider = new firebase.auth.GoogleAuthProvider();
-      await auth.signInWithPopup(provider);
+      await auth.signInWithRedirect(provider);
     } catch(e) {
       if (e.code !== 'auth/popup-closed-by-user') {
         err.textContent = e.message;
