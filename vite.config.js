@@ -12,7 +12,7 @@ const htmlEnvPlugin = () => {
     transformIndexHtml(html) {
       const env = loadEnv(config.mode, process.cwd(), '');
       return html.replace(/%([\w]+)%/g, (match, key) => {
-        return env[key] || match;
+        return process.env[key] || env[key] || match;
       });
     }
   };
