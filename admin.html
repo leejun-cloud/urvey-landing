@@ -247,7 +247,11 @@
     .memo-panel { background:#0d0d1e; border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:10px; }
     .memo-ta { width:100%; background:transparent; border:none; color:var(--text); padding:0; font-size:13px; font-family:inherit; resize:none; min-height:68px; outline:none; line-height:1.65; }
     .memo-ta::placeholder { color:var(--muted); }
-    .memo-btn-row { display:flex; gap:8px; margin-top:8px; }
+    .memo-btn-row { display:flex; gap:8px; margin-top:8px; align-items:center; }
+    .memo-stt-btn { background:#1a1a3a; border:1px solid #7c3aed; color:#a78bfa; padding:7px 12px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all .2s; }
+    .memo-stt-btn:hover { background:#1e1b4b; border-color:#8b5cf6; }
+    .memo-stt-btn.recording { background:#7c3aed; color:white; border-color:white; animation:sttpulse 1.2s infinite; }
+    @keyframes sttpulse { 0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,.4)} 50%{box-shadow:0 0 0 8px rgba(124,58,237,0)} }
     .memo-ai-btn { background:#4f46e5; color:white; border:none; padding:7px 14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; }
     .memo-ai-btn:disabled { opacity:.5; cursor:not-allowed; }
     .memo-save-btn { background:var(--green); color:white; border:none; padding:7px 14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; display:none; }
@@ -1058,6 +1062,8 @@
       <div class="memo-panel">
         <textarea class="memo-ta" id="memoTa" placeholder="오늘 상담에서 있었던 일, 느낀 점, 특이사항 등을 간단히 메모하세요..."  rows="3"></textarea>
         <div class="memo-btn-row">
+          <button class="memo-stt-btn" id="memoSttBtn" onclick="toggleMemoStt()">🎙️ 음성 입력</button>
+          <div style="flex:1"></div>
           <button class="memo-ai-btn" id="memoAiBtn" onclick="expandMemo()">✨ AI로 정리</button>
           <button class="memo-save-btn" id="memoSaveBtn" onclick="saveMemo()">💾 저장</button>
           <button style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 12px;border-radius:8px;font-size:12px;cursor:pointer;" onclick="saveRawMemo()">바로 저장</button>
@@ -1446,7 +1452,7 @@ ${summaries.join('\n')}
   // ═══════════════════════════════════════════════════════════
   async function callGemini(prompt) {
     const res = await fetch(
-      `https://survey-gemini-proxy.leejun-api.workers.dev/v1beta/models/gemini-2.0-flash-lite:generateContent`,
+      `https://survey-gemini-proxy.leejun-api.workers.dev/v1beta/models/gemini-1.5-pro:generateContent`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1460,7 +1466,7 @@ ${summaries.join('\n')}
 
   async function callGeminiAudio(audioBase64, mimeType, contextPrompt) {
     const res = await fetch(
-      `https://survey-gemini-proxy.leejun-api.workers.dev/v1beta/models/gemini-1.5-flash:generateContent`,
+      `https://survey-gemini-proxy.leejun-api.workers.dev/v1beta/models/gemini-1.5-pro:generateContent`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1493,9 +1499,56 @@ ${summaries.join('\n')}
   //  RECORDING
   // ═══════════════════════════════════════════════════════════
   let mediaRecorder = null, recChunks = [], recTimerInt = null, recSeconds = 0;
+  let memoRecorder = null, memoChunks = [], memoSttActive = false;
 
   function fmtTime(s) {
     return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  }
+
+  // ── MEMO STT ──
+  async function toggleMemoStt() {
+    const btn = document.getElementById('memoSttBtn');
+    if (memoSttActive) {
+      memoRecorder.stop();
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        memoChunks = [];
+        memoRecorder = new MediaRecorder(stream);
+        memoRecorder.ondataavailable = e => { if(e.data.size > 0) memoChunks.push(e.data); };
+        memoRecorder.onstop = async () => {
+          btn.classList.remove('recording');
+          btn.innerHTML = '🤖 변환 중...';
+          btn.disabled = true;
+          const blob = new Blob(memoChunks, { type: 'audio/webm' });
+          await sttMemo(blob);
+          btn.disabled = false;
+          btn.innerHTML = '🎙️ 음성 입력';
+          memoSttActive = false;
+        };
+        memoRecorder.start();
+        memoSttActive = true;
+        btn.classList.add('recording');
+        btn.innerHTML = '⏹ 중단 (STT)';
+      } catch (err) {
+        alert('마이크 접근 권한이 필요해요.\n' + err.message);
+      }
+    }
+  }
+
+  async function sttMemo(blob) {
+    try {
+      const base64 = await blobToBase64(blob);
+      const prompt = "아래 오디오 내용을 들리는 대로 정확하게 한국어로 받아쓰기(Dictation) 해주세요. 다른 설명 없이 텍스트만 출력하세요.";
+      const text = await callGeminiAudio(base64, 'audio/webm', prompt);
+      const ta = document.getElementById('memoTa');
+      if (ta) {
+        if (ta.value.trim()) ta.value += '\n' + text;
+        else ta.value = text;
+      }
+    } catch (err) {
+      alert('STT 변환 실패: ' + err.message);
+    }
   }
 
   async function toggleRecord() {
