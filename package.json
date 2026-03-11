@@ -1,0 +1,26 @@
+{
+  "name": "survey-landing",
+  "version": "1.0.0",
+  "description": "MBTI + 혈액형 맞춤 가이드를 후킹으로 대학 1학년 연락처를 수집하는 랜딩 페이지.",
+  "main": "apps-script.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leejun-cloud/urvey-landing.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/leejun-cloud/urvey-landing/issues"
+  },
+  "homepage": "https://github.com/leejun-cloud/urvey-landing#readme",
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}
