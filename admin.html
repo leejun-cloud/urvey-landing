@@ -1452,7 +1452,7 @@ ${summaries.join('\n')}
   // ═══════════════════════════════════════════════════════════
   async function callGemini(prompt) {
     const res = await fetch(
-      `https://survey-gemini-proxy.leejun-api.workers.dev/v1beta/models/gemini-1.5-pro:generateContent`,
+      `https://survey-gemini-proxy.leejun-api.workers.dev/v1beta/models/gemini-2.0-flash:generateContent`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1466,7 +1466,7 @@ ${summaries.join('\n')}
 
   async function callGeminiAudio(audioBase64, mimeType, contextPrompt) {
     const res = await fetch(
-      `https://survey-gemini-proxy.leejun-api.workers.dev/v1beta/models/gemini-1.5-pro:generateContent`,
+      `https://survey-gemini-proxy.leejun-api.workers.dev/v1beta/models/gemini-2.0-flash:generateContent`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
