@@ -240,7 +240,8 @@
     <div class="login-section hidden" id="secSignup">
       <input class="f-input" type="email" id="signupEmail" placeholder="이메일" />
       <input class="f-input" type="password" id="signupPw" placeholder="비밀번호 (6자 이상)" />
-      <input class="f-input" type="password" id="signupPw2" placeholder="비밀번호 확인" onkeydown="if(event.key==='Enter')doSignup()" />
+      <input class="f-input" type="password" id="signupPw2" placeholder="비밀번호 확인" />
+      <input class="f-input" type="text" id="signupInviter" placeholder="초대자 코드 (선택)" style="margin-top:10px" onkeydown="if(event.key==='Enter')doSignup()" />
       <button class="login-btn" onclick="doSignup()">계정 만들기</button>
     </div>
 
@@ -265,13 +266,19 @@
       </div>
 
       <div class="sb-sec">
-        <div class="sb-lbl">📲 나의 공유 링크</div>
+        <div class="sb-lbl">새가족 신청 링크</div>
         <div class="qr-box"><img id="qrImg" src="" width="128" height="128" alt="QR" /></div>
-        <div class="ref-row">
-          <input class="ref-inp" id="refInp" type="text" placeholder="나만의 코드 (영문)" maxlength="20" />
+        <div class="ref-row" style="margin-bottom:8px">
+          <input class="ref-inp" id="refInp" type="text" placeholder="고유 코드" maxlength="20" />
           <button class="ref-save" onclick="saveRefCode()">저장</button>
         </div>
-        <button class="copy-btn" onclick="copyLink()">🔗 링크 복사</button>
+        <button class="copy-btn" onclick="copyLink()">🔗 신청 링크 복사</button>
+
+        <div style="margin:20px 0 10px; border-top:1px solid var(--border)"></div>
+        
+        <div class="sb-lbl">동역자(하위 관리자) 초대</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">이 링크로 가입하면 내 아래에 소속됩니다.</div>
+        <button class="copy-btn" style="background:#4f46e5;color:white;border:none;" onclick="copyAdminLink(this)">🤝 동역자 초대 링크 복사</button>
       </div>
 
       <div class="sb-sec">
@@ -623,7 +630,20 @@
     AB: { title: '복합적 창의형',     personality: `이성과 감성이 공존하는 다면적 성향이 더해집니다. 상황에 따라 다양한 모습을 보이며 창의적 시각이 강화되지만, 너무 많은 것을 고려하다 결정이 느려지는 경향이 있어요.` },
   };
 
-  let me = null, myRef = '', allDocs = [], curFilter = 'all', curSearch = '', curId = null, curActType = '';
+  let me = null, myRef = '', myInviter = '', allDownstreamRefs = [], allDocs = [], curFilter = 'all', curSearch = '', curId = null, curActType = '';
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const initInviter = urlParams.get('inviter');
+  if (initInviter) {
+    localStorage.setItem('adminInviterCode', initInviter);
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    const savedInviter = localStorage.getItem('adminInviterCode');
+    if (savedInviter) {
+      const el = document.getElementById('signupInviter');
+      if (el) el.value = savedInviter;
+    }
+  });
 
   // 스킬 체크박스
   document.getElementById('addSkillGrid').innerHTML = SKILLS.map(s =>
@@ -710,9 +730,11 @@
     const doc = await ref.get();
     if (doc.exists) {
       myRef = doc.data().refCode || '';
+      myInviter = doc.data().inviter || '';
     } else {
       myRef = me.email.split('@')[0].replace(/[^a-z0-9_-]/gi,'').toLowerCase();
-      await ref.set({ email: me.email, refCode: myRef, createdAt: fv.serverTimestamp() });
+      myInviter = document.getElementById('signupInviter')?.value.trim() || localStorage.getItem('adminInviterCode') || '';
+      await ref.set({ email: me.email, refCode: myRef, inviter: myInviter, createdAt: fv.serverTimestamp() });
     }
     document.getElementById('refInp').value = myRef;
     updateShareUI();
@@ -748,10 +770,48 @@
     });
   }
 
+  function copyAdminLink(btn) {
+    let baseUrl = window.location.href.split('?')[0];
+    const adminUrl = baseUrl + (myRef ? `?inviter=${myRef}` : '');
+    navigator.clipboard.writeText(adminUrl).then(() => {
+      const oldTxt = btn.textContent;
+      btn.textContent = '✅ 복사됐어요!';
+      setTimeout(() => btn.textContent = oldTxt, 2000);
+    });
+  }
+
   // ── SUBMISSIONS ──
   async function loadSubmissions() {
+    // 1. Build downstream tree
+    const usersSnap = await db.collection('users').get();
+    const users = usersSnap.docs.map(d => d.data());
+    
+    allDownstreamRefs = [myRef];
+    let queue = [myRef];
+    while(queue.length > 0) {
+      let cur = queue.shift();
+      if (!cur) continue;
+      let children = users.filter(u => u.inviter === cur).map(u => u.refCode);
+      for(let child of children) {
+          if(child && !allDownstreamRefs.includes(child)) {
+              allDownstreamRefs.push(child);
+              queue.push(child);
+          }
+      }
+    }
+
+    // 2. Load submissions
     const snap = await db.collection('submissions').orderBy('createdAt','desc').get();
-    allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    let rawDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // 3. Filter if not master (master = no inviter)
+    const isMaster = !myInviter;
+    if (isMaster) {
+      allDocs = rawDocs;
+    } else {
+      allDocs = rawDocs.filter(d => allDownstreamRefs.includes(d.referredBy));
+    }
+
     renderTable();
     updateStats();
   }
