@@ -73,6 +73,60 @@
     /* ── MAIN ── */
     .main { flex:1; padding:28px 32px; overflow-y:auto; min-width:0; }
     .page { display:none; }
+
+    /* ── DASHBOARD ── */
+    .dash-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; margin-bottom:24px; }
+    .dash-kpi { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 20px; }
+    .dash-kpi .kpi-lbl { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin-bottom:10px; }
+    .dash-kpi .kpi-val { font-size:32px; font-weight:900; }
+    .dash-kpi .kpi-sub { font-size:12px; color:var(--muted); margin-top:4px; }
+    .dash-kpi.warn .kpi-val { color:#f59e0b; }
+    .dash-kpi.ok   .kpi-val { color:var(--green); }
+    .dash-kpi.info .kpi-val { color:var(--primary); }
+    .dash-kpi.red  .kpi-val { color:var(--red); }
+
+    .dash-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+    @media(max-width:900px){ .dash-row { grid-template-columns:1fr; } }
+
+    .dash-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 20px; }
+    .dash-card-hd { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+    .dash-card-hd h3 { font-size:14px; font-weight:700; }
+    .dash-card-hd .badge { font-size:10px; font-weight:700; background:var(--primary); color:white; padding:3px 8px; border-radius:20px; }
+
+    .team-member { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+    .team-member:last-child { border-bottom:none; }
+    .tm-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#818cf8); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:white; flex-shrink:0; }
+    .tm-info { flex:1; min-width:0; }
+    .tm-name { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .tm-meta { font-size:11px; color:var(--muted); margin-top:2px; }
+    .tm-count { font-size:20px; font-weight:900; color:var(--primary); flex-shrink:0; }
+    .tm-alert { font-size:10px; color:#f59e0b; font-weight:700; flex-shrink:0; }
+
+    .feed-item { padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer; }
+    .feed-item:last-child { border-bottom:none; }
+    .feed-item:hover { opacity:.8; }
+    .feed-top { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+    .feed-emoji { font-size:16px; }
+    .feed-name { font-size:13px; font-weight:700; }
+    .feed-leader { font-size:11px; color:var(--muted); }
+    .feed-text { font-size:12px; color:#cbd5e1; line-height:1.6; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .feed-time { font-size:10px; color:var(--muted); margin-top:4px; }
+
+    .orphan-item { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); }
+    .orphan-item:last-child { border-bottom:none; }
+    .orphan-name { font-size:13px; font-weight:600; }
+    .orphan-meta { font-size:11px; color:var(--muted); }
+    .assign-sel { background:#0a0a14; border:1px solid var(--border); color:var(--text); padding:5px 8px; border-radius:7px; font-size:11px; cursor:pointer; }
+    .assign-btn { background:var(--primary); color:white; border:none; padding:5px 10px; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer; margin-left:5px; }
+
+    .prayer-item { padding:8px 12px; background:#0d0d1e; border-radius:8px; margin-bottom:6px; }
+    .prayer-title { font-size:12px; font-weight:700; color:var(--primary); margin-bottom:4px; }
+    .prayer-text { font-size:12px; color:#cbd5e1; line-height:1.6; }
+
+    .no-inactive { font-size:13px; color:var(--muted); text-align:center; padding:20px 0; }
+    .ai-report-btn { width:100%; background:linear-gradient(135deg,#4f46e5,#7c3aed); color:white; border:none; padding:12px; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; margin-top:10px; }
+    .ai-report-box { background:#0f0f2e; border:1px solid #4f46e5; border-radius:10px; padding:14px; margin-top:10px; font-size:13px; color:#cbd5e1; line-height:1.7; white-space:pre-wrap; }
+    .dash-full { grid-column:1/-1; }
     .page.active { display:block; }
     .pg-title { font-size:22px; font-weight:800; margin-bottom:4px; }
     .pg-sub { color:var(--muted); font-size:14px; margin-bottom:22px; }
@@ -289,6 +343,7 @@
       </div>
 
       <div class="sb-nav">
+        <button class="nav-item" id="nav-dash" onclick="showPage('dashPage','nav-dash')">🏠 팀 대시보드</button>
         <button class="nav-item active" id="nav-list" onclick="showPage('listPage','nav-list')">📋 전체 현황</button>
         <button class="nav-item" id="nav-add" onclick="showPage('addPage','nav-add')">➕ 수동 입력</button>
       </div>
@@ -310,6 +365,74 @@
 
     <!-- MAIN -->
     <main class="main">
+
+      <!-- DASHBOARD PAGE -->
+      <div class="page" id="dashPage">
+        <div class="pg-title">🏠 팀 돌봄 대시보드</div>
+        <div class="pg-sub" id="dashSub">내 팀 전체 현황을 한눈에 파악해요</div>
+
+        <!-- KPI 요약 -->
+        <div class="dash-grid">
+          <div class="dash-kpi info"><div class="kpi-lbl">팀 전체 인원</div><div class="kpi-val" id="kpiTotal">-</div><div class="kpi-sub">내 하위 트리 기준</div></div>
+          <div class="dash-kpi ok">  <div class="kpi-lbl">이번 주 상담</div><div class="kpi-val" id="kpiWeek">-</div><div class="kpi-sub">최근 7일 기록</div></div>
+          <div class="dash-kpi warn"><div class="kpi-lbl">7일 이상 미접촉</div><div class="kpi-val" id="kpiInactive">-</div><div class="kpi-sub">돌봄이 필요한 영혼</div></div>
+          <div class="dash-kpi red"> <div class="kpi-lbl">기도 제목 대기</div><div class="kpi-val" id="kpiPrayer">-</div><div class="kpi-sub">AI 추출 기도 포인트</div></div>
+        </div>
+
+        <!-- 팀원 현황 + 상담 피드 -->
+        <div class="dash-row">
+          <div class="dash-card">
+            <div class="dash-card-hd">
+              <h3>👥 동역자 현황</h3>
+              <span class="badge" id="dashTeamBadge">0명</span>
+            </div>
+            <div id="dashTeam"><div class="no-inactive">로딩 중...</div></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-hd">
+              <h3>📋 최근 상담 기록 피드</h3>
+            </div>
+            <div id="dashFeed"><div class="no-inactive">로딩 중...</div></div>
+          </div>
+        </div>
+
+        <!-- 미접촉 학생 + 기도 제목 -->
+        <div class="dash-row">
+          <div class="dash-card">
+            <div class="dash-card-hd">
+              <h3>⚠️ 미접촉 학생 (7일+)</h3>
+              <button onclick="loadDashboard()" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 10px;border-radius:7px;font-size:11px;cursor:pointer;">새로고침</button>
+            </div>
+            <div id="dashInactive"><div class="no-inactive">확인 중...</div></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-hd">
+              <h3>🙏 팀 기도 제목</h3>
+              <span class="badge" style="background:#7c3aed" id="dashPrayerBadge">0</span>
+            </div>
+            <div id="dashPrayer"><div class="no-inactive">로딩 중...</div></div>
+          </div>
+        </div>
+
+        <!-- 학생 재배정 -->
+        <div class="dash-card" style="margin-bottom:24px">
+          <div class="dash-card-hd">
+            <h3>🔄 학생 재배정</h3>
+            <span style="font-size:11px;color:var(--muted)">담당자를 변경할 학생을 선택하세요</span>
+          </div>
+          <div id="dashReassign"><div class="no-inactive">로딩 중...</div></div>
+        </div>
+
+        <!-- AI 팀 보고서 -->
+        <div class="dash-card">
+          <div class="dash-card-hd">
+            <h3>🤖 AI 팀 돌봄 보고서</h3>
+            <span style="font-size:11px;color:var(--muted)">Gemini가 팀 전체를 분석해요</span>
+          </div>
+          <button class="ai-report-btn" onclick="generateTeamReport()">✨ 팀 상황 분석 · 돌봄 제안 받기</button>
+          <div id="dashReport"></div>
+        </div>
+      </div>
 
       <!-- LIST PAGE -->
       <div class="page active" id="listPage">
@@ -1029,12 +1152,295 @@
     showPage('listPage','nav-list');
   }
 
-  // ── NAV ──
+  // \u2500\u2500 NAV \u2500\u2500
   function showPage(pageId, navId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
     document.getElementById(navId).classList.add('active');
+    if (pageId === 'dashPage') loadDashboard();
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  DASHBOARD
+  // ═══════════════════════════════════════════════════════════
+
+  // 하위 관리자 목록 보관 (email → refCode 매핑 포함)
+  let allUsersCache = [];
+
+  async function loadDashboard() {
+    // 1. 전체 users 가져오기 (already loaded in loadSubmissions, but re-fetch for freshness)
+    const usersSnap = await db.collection('users').get();
+    allUsersCache = usersSnap.docs.map(d => ({ uid: d.id, ...d.data() }));
+
+    // 2. 내 하위 트리 계산
+    const downstreamRefs = buildDownstreamRefs(allUsersCache, myRef);
+    // 내 직속 sub-admin들
+    const directSubAdmins = allUsersCache.filter(u => u.inviter === myRef);
+
+    // 3. 내 scope 신청자
+    const isMaster = !myInviter;
+    const myDocs = isMaster ? allDocs : allDocs.filter(d => downstreamRefs.includes(d.referredBy));
+
+    // 4. 활동 기록 모두 불러오기 (최근 피드용)
+    const now = new Date();
+    const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    const oneMonthAgo  = new Date(now - 30 * 24 * 60 * 60 * 1000);
+
+    // 각 신청자의 마지막 활동 기록과 기도 제목 (병렬 로드)
+    const activityResults = await Promise.all(
+      myDocs.map(sub =>
+        db.collection('submissions').doc(sub.id)
+          .collection('activities').orderBy('createdAt','desc').limit(10).get()
+          .then(snap => ({
+            sub,
+            acts: snap.docs.map(d => ({ id: d.id, ...d.data() }))
+          }))
+      )
+    );
+
+    // 5. KPI 계산
+    let weekCounselingCount = 0;
+    let inactiveCount = 0;
+    let prayerPoints = [];
+    let recentFeedItems = []; // {name, act, leadRef}
+
+    activityResults.forEach(({ sub, acts }) => {
+      // 이번 주 상담 건수
+      const weekActs = acts.filter(a => {
+        const d = a.createdAt?.toDate ? a.createdAt.toDate() : null;
+        return d && d >= sevenDaysAgo;
+      });
+      weekCounselingCount += weekActs.length;
+
+      // 미접촉 (7일 이상 아무 기록 없음)
+      const lastAct = acts[0];
+      const lastDate = lastAct?.createdAt?.toDate ? lastAct.createdAt.toDate() : null;
+      const daysSince = lastDate ? Math.floor((now - lastDate) / 86400000) : 999;
+      sub._daysSince = daysSince;
+      sub._lastDate = lastDate;
+      if (daysSince >= 7) inactiveCount++;
+
+      // 기도 포인트 추출 (기도·상담 기록에서)
+      acts.forEach(a => {
+        if (a.prayerPoints) prayerPoints.push({ name: sub.name, text: a.prayerPoints, date: a.createdAt?.toDate?.() });
+      });
+
+      // 피드 (최근 기록 중 상담/메모 유형)
+      acts.slice(0, 3).forEach(a => {
+        recentFeedItems.push({ sub, act: a, daysSince: Math.floor((now - (a.createdAt?.toDate?.() || now)) / 86400000) });
+      });
+    });
+
+    // 피드 최신순 정렬 top 15
+    recentFeedItems.sort((a, b) => {
+      const da = a.act.createdAt?.toDate?.() || new Date(0);
+      const db_ = b.act.createdAt?.toDate?.() || new Date(0);
+      return db_ - da;
+    });
+    recentFeedItems = recentFeedItems.slice(0, 15);
+
+    // 6. KPI 업데이트
+    document.getElementById('kpiTotal').textContent = myDocs.length;
+    document.getElementById('kpiWeek').textContent = weekCounselingCount;
+    document.getElementById('kpiInactive').textContent = inactiveCount;
+    document.getElementById('kpiPrayer').textContent = prayerPoints.length;
+    document.getElementById('dashSub').textContent =
+      `${myDocs.length}명의 영혼 · ${directSubAdmins.length}명의 동역자`;
+
+    // 7. 팀원 현황 렌더
+    renderDashTeam(directSubAdmins, myDocs, activityResults);
+
+    // 8. 피드 렌더
+    renderDashFeed(recentFeedItems);
+
+    // 9. 미접촉 학생
+    renderDashInactive(activityResults.filter(({sub}) => sub._daysSince >= 7));
+
+    // 10. 기도 제목
+    renderDashPrayer(prayerPoints);
+
+    // 11. 재배정 렌더
+    renderDashReassign(myDocs, directSubAdmins, allUsersCache);
+  }
+
+  function buildDownstreamRefs(users, rootRef) {
+    const refs = [rootRef];
+    let q = [rootRef];
+    while (q.length) {
+      const cur = q.shift();
+      users.filter(u => u.inviter === cur).forEach(u => {
+        if (u.refCode && !refs.includes(u.refCode)) { refs.push(u.refCode); q.push(u.refCode); }
+      });
+    }
+    return refs;
+  }
+
+  function renderDashTeam(subAdmins, myDocs, activityResults) {
+    const el = document.getElementById('dashTeam');
+    document.getElementById('dashTeamBadge').textContent = subAdmins.length + '명';
+    if (!subAdmins.length) {
+      el.innerHTML = '<div class="no-inactive">아직 동역자가 없어요.<br>초대 링크를 공유해 보세요!</div>';
+      return;
+    }
+    el.innerHTML = subAdmins.map(u => {
+      const count = myDocs.filter(d => d.referredBy === u.refCode).length;
+      // 최근 7일 활동 있는지
+      const now = new Date();
+      const sevenAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+      const recentActs = activityResults.filter(({ sub }) => sub.referredBy === u.refCode && sub._daysSince < 7);
+      const alertFlag = count > 0 && recentActs.length === 0 ? '<span class="tm-alert">⚠️ 활동 없음</span>' : '';
+      const initials = (u.email || '?').substring(0, 2).toUpperCase();
+      return `<div class="team-member">
+        <div class="tm-avatar">${initials}</div>
+        <div class="tm-info">
+          <div class="tm-name">${u.email || u.refCode}</div>
+          <div class="tm-meta">코드: ${u.refCode || '-'}</div>
+        </div>
+        <div class="tm-count">${count}</div>
+        ${alertFlag}
+      </div>`;
+    }).join('');
+  }
+
+  function renderDashFeed(items) {
+    const el = document.getElementById('dashFeed');
+    if (!items.length) { el.innerHTML = '<div class="no-inactive">최근 상담 기록이 없어요</div>'; return; }
+    el.innerHTML = items.map(({ sub, act, daysSince }) => {
+      const emoji = act.type?.split(' ')[0] || '📝';
+      const preview = (act.content || '').substring(0, 80);
+      const timeLabel = daysSince === 0 ? '오늘' : daysSince === 1 ? '어제' : `${daysSince}일 전`;
+      return `<div class="feed-item" onclick="openDetail('${sub.id}');showPage('listPage','nav-list')">
+        <div class="feed-top">
+          <span class="feed-emoji">${emoji}</span>
+          <span class="feed-name">${sub.name}</span>
+          <span class="feed-leader">(${sub.referredBy || ''})</span>
+        </div>
+        <div class="feed-text">${preview}${preview.length >= 80 ? '…' : ''}</div>
+        <div class="feed-time">${timeLabel} · ${act.type || ''}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderDashInactive(inactiveResults) {
+    const el = document.getElementById('dashInactive');
+    if (!inactiveResults.length) {
+      el.innerHTML = '<div class="no-inactive">✅ 7일 이상 미접촉 학생이 없어요!</div>';
+      return;
+    }
+    inactiveResults.sort((a, b) => b.sub._daysSince - a.sub._daysSince);
+    el.innerHTML = inactiveResults.map(({ sub }) => {
+      const d = sub._daysSince === 999 ? '상담 기록 없음' : `${sub._daysSince}일 미접촉`;
+      const urgency = sub._daysSince >= 30 ? '#ef4444' : sub._daysSince >= 14 ? '#f59e0b' : '#94a3b8';
+      return `<div class="orphan-item">
+        <div>
+          <div class="orphan-name" style="cursor:pointer" onclick="openDetail('${sub.id}');showPage('listPage','nav-list')">${sub.name}</div>
+          <div class="orphan-meta">${sub.univ || ''} · ${sub.contact || ''}</div>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:${urgency}">${d}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function renderDashPrayer(prayerPoints) {
+    const el = document.getElementById('dashPrayer');
+    document.getElementById('dashPrayerBadge').textContent = prayerPoints.length;
+    if (!prayerPoints.length) {
+      el.innerHTML = '<div class="no-inactive">AI 상담 분석 후 기도 제목이 자동 추출돼요.<br>📌 상담 기록을 저장할 때 생성됩니다.</div>';
+      return;
+    }
+    el.innerHTML = prayerPoints.slice(0, 10).map(p => `
+      <div class="prayer-item">
+        <div class="prayer-title">🙏 ${p.name}</div>
+        <div class="prayer-text">${p.text}</div>
+      </div>`).join('');
+  }
+
+  function renderDashReassign(myDocs, subAdmins, allUsers) {
+    const el = document.getElementById('dashReassign');
+    if (!myDocs.length) { el.innerHTML = '<div class="no-inactive">재배정할 학생이 없어요</div>'; return; }
+
+    const leaderOptions = [
+      `<option value="${myRef}">${myRef} (나)</option>`,
+      ...subAdmins.map(u => `<option value="${u.refCode}">${u.email || u.refCode}</option>`)
+    ].join('');
+
+    el.innerHTML = myDocs.map(sub => `
+      <div class="orphan-item" id="reassign-${sub.id}">
+        <div>
+          <div class="orphan-name">${sub.name}</div>
+          <div class="orphan-meta">현재: ${sub.referredBy || '미배정'} · ${sub.univ || ''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+          <select class="assign-sel" id="sel-${sub.id}">
+            ${leaderOptions}
+          </select>
+          <button class="assign-btn" onclick="reassignStudent('${sub.id}')">이관</button>
+        </div>
+      </div>`).join('');
+
+    // 현재 리더 미리선택
+    myDocs.forEach(sub => {
+      const sel = document.getElementById(`sel-${sub.id}`);
+      if (sel) sel.value = sub.referredBy || '';
+    });
+  }
+
+  async function reassignStudent(subId) {
+    const sel = document.getElementById(`sel-${subId}`);
+    const newLeader = sel?.value;
+    if (!newLeader) return;
+    await db.collection('submissions').doc(subId).update({ referredBy: newLeader });
+    // 로컬 캐시 업데이트
+    const s = allDocs.find(d => d.id === subId);
+    if (s) s.referredBy = newLeader;
+    const row = document.getElementById(`reassign-${subId}`);
+    if (row) row.querySelector('.orphan-meta').textContent = `현재: ${newLeader} · ${s?.univ || ''}`;
+    alert(`${s?.name}님의 담당자를 "${newLeader}"로 변경했어요.`);
+    renderTable();
+    updateStats();
+  }
+
+  async function generateTeamReport() {
+    const reportEl = document.getElementById('dashReport');
+    reportEl.innerHTML = '<div class="ai-report-box"><span class="spinner"></span> Gemini가 팀 전체를 분석 중이에요...</div>';
+    try {
+      const isMaster = !myInviter;
+      const myDocs_ = isMaster ? allDocs : allDocs.filter(d => allDownstreamRefs.includes(d.referredBy));
+      const now = new Date();
+      const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+
+      // 최근 1달 활동 요약 수집 (최대 30명)
+      const sample = myDocs_.slice(0, 30);
+      const summaries = await Promise.all(
+        sample.map(async sub => {
+          const snap = await db.collection('submissions').doc(sub.id)
+            .collection('activities').orderBy('createdAt', 'desc').limit(5).get();
+          const acts = snap.docs.map(d => d.data().content || '').filter(Boolean).slice(0, 3);
+          return `- ${sub.name}(${sub.mbti || '?'}/${sub.blood || '?'}형): ${acts.join(' | ') || '기록 없음'}`;
+        })
+      );
+
+      const today = now.toLocaleDateString('ko-KR');
+      const prompt = `당신은 교회 영혼 돌봄 코치입니다. 아래는 ${today} 기준 팀 전체 신청자 ${myDocs_.length}명의 최근 상담 현황입니다.
+
+${summaries.join('\n')}
+
+다음 항목으로 한국어 보고서를 작성해 주세요:
+1. 전체 팀 돌봄 현황 요약 (2~3문장)
+2. 특별히 관심과 집중이 필요한 케이스 3가지 (이름 포함)
+3. 이번 달 중점 돌봄 방향 3가지 (구체적인 실천 방법)
+4. 팀 전체를 위한 기도 제목 (3가지)
+5. 상위 리더십에 전달할 한 줄 요약
+
+보고서 형식으로 명확하게 작성해 주세요.`;
+
+      const result = await callGemini(prompt);
+      reportEl.innerHTML = `<div class="ai-report-box">${result}</div>
+        <div style="text-align:right;margin-top:8px;font-size:11px;color:var(--muted)">생성일: ${today} · Gemini AI</div>`;
+    } catch (e) {
+      reportEl.innerHTML = `<div class="ai-report-box" style="color:#f87171">오류: ${e.message}</div>`;
+    }
   }
 
   // ═══════════════════════════════════════════════════════════
