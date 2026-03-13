@@ -547,7 +547,7 @@
   const db   = firebase.firestore();
   const fv   = firebase.firestore.FieldValue;
 
-  const BASE_URL  = 'https://leejun-cloud.github.io/urvey-landing/';
+  const BASE_URL  = window.location.origin + '/';
   const SKILLS    = ['영어회화·외국어','토플·토익 점수','관계·소통 역량','SNS 콘텐츠 제작','AI 프롬프트 활용','AI 코딩','AI 동영상 제작','취업·인턴 준비','창업·사이드프로젝트','학점 관리·공부법'];
   const ACT_TYPES = ['📞 첫 연락','💬 반응 확인','📅 미팅','🤝 멘토 매칭','📲 2차 연락','⏸️ 보류','✅ 완료','📝 메모'];
   const ST_MAP    = { new:['st-new','신규'], contacting:['st-contacting','연락 중'], matched:['st-matched','매칭 완료'], hold:['st-hold','보류'] };
@@ -781,7 +781,12 @@
 
   // ── AUTH ──
   // Google redirect 결과 처리 (signInWithRedirect 후 복귀 시)
-  auth.getRedirectResult().catch(() => {});
+  auth.getRedirectResult().catch(e => {
+    if (e.code && e.code !== 'auth/no-current-user') {
+      document.getElementById('loginErr').textContent = e.message;
+      console.error('[Auth] getRedirectResult error:', e.code, e.message);
+    }
+  });
 
   auth.onAuthStateChanged(async user => {
     if (user) {

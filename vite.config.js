@@ -19,8 +19,8 @@ const htmlEnvPlugin = () => {
 };
 
 export default defineConfig({
-  // GitHub Pages 배포 시 레포지토리 이름과 일치해야 함
-  base: "/urvey-landing/",
+  // Vercel 배포 - 루트 경로 사용
+  base: "/",
   plugins: [htmlEnvPlugin()],
   build: {
     rollupOptions: {
