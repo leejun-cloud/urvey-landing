@@ -356,7 +356,7 @@
 
       <div class="sb-sec">
         <div class="sb-lbl">🤖 Gemini AI 상태</div>
-        <div style="font-size:11px;color:#6ee7b7;margin-top:5px;">✅ Cloudflare 안전 연결됨</div>
+        <div style="font-size:11px;color:#6ee7b7;margin-top:5px;">✅ Vercel 안전 연결됨</div>
       </div>
 
       <div class="logout-area">
@@ -1462,7 +1462,7 @@ ${summaries.join('\n')}
   // ═══════════════════════════════════════════════════════════
   async function callGemini(prompt) {
     const res = await fetch(
-      `https://survey-gemini-proxy.leejun-api.workers.dev/v1beta/models/gemini-2.0-flash:generateContent`,
+      `/api/gemini/v1beta/models/gemini-2.0-flash:generateContent`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1476,7 +1476,7 @@ ${summaries.join('\n')}
 
   async function callGeminiAudio(audioBase64, mimeType, contextPrompt) {
     const res = await fetch(
-      `https://survey-gemini-proxy.leejun-api.workers.dev/v1beta/models/gemini-2.0-flash:generateContent`,
+      `/api/gemini/v1beta/models/gemini-2.0-flash:generateContent`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
