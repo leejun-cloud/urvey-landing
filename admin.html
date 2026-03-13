@@ -780,13 +780,6 @@
   ).join('');
 
   // ── AUTH ──
-  // Google redirect 결과 처리 (signInWithRedirect 후 복귀 시)
-  auth.getRedirectResult().catch(e => {
-    if (e.code && e.code !== 'auth/no-current-user') {
-      document.getElementById('loginErr').textContent = e.message;
-      console.error('[Auth] getRedirectResult error:', e.code, e.message);
-    }
-  });
 
   auth.onAuthStateChanged(async user => {
     if (user) {
@@ -846,7 +839,7 @@
     err.textContent = '';
     try {
       const provider = new firebase.auth.GoogleAuthProvider();
-      await auth.signInWithRedirect(provider);
+      await auth.signInWithPopup(provider);
     } catch(e) {
       if (e.code !== 'auth/popup-closed-by-user') {
         err.textContent = e.message;
